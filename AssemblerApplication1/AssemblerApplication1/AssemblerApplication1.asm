@@ -3,20 +3,21 @@
  *
  *  Created: 17/08/2012 08:48:43
  *   Author: tony
- */ 
+ */
 .NOLIST ; Don't list the following in the list file
 .INCLUDE "m2560def.inc" ; Import of the file
+.INCLUDE "aosd_macros.inc" ; Import of the file
 .LIST ; Switch list on again
 .EQU fq = 16000000 ; XTal frequency definition
 ;
 ; ============================================
-;   H A R D W A R E   I N F O R M A T I O N   
+;   H A R D W A R E   I N F O R M A T I O N
 ; ============================================
 ;
 ; [Add all hardware information here]
 ;
 ; ============================================
-;      P O R T S   A N D   P I N S 
+;      P O R T S   A N D   P I N S
 ; ============================================
 ;
 ; [Add names for hardware ports and pins here]
@@ -25,7 +26,7 @@
 ;         .EQU LedOutputPin = PORTA2
 ;
 ; ============================================
-;    C O N S T A N T S   T O   C H A N G E 
+;    C O N S T A N T S   T O   C H A N G E
 ; ============================================
 ;
 ; [Add all constants here that can be subject
@@ -33,7 +34,7 @@
 ; Format: .EQU const = $ABCD
 ;
 ; ============================================
-;  F I X + D E R I V E D   C O N S T A N T S 
+;  F I X + D E R I V E D   C O N S T A N T S
 ; ============================================
 ;
 ; [Add all constants here that are not subject
@@ -89,13 +90,9 @@ SetBit:
 ; ============================================
 ;
 RESET:
-; Init stack
-        ldi rmp, LOW(RAMEND) ; Set up the stack pointer
-        out SPL,rmp
-		ldi rmp, HIGH(RAMEND)
-		out SPH, rmp
+		INIT_STACK	;Macro to set up the stack pointer
 ; Init Port B
-        ldi rmp,0b10000000 ; Direction of Port B - arduino board LED is port B pin 7 
+        ldi rmp,0b10000000 ; Direction of Port B - arduino board LED is port B pin 7
         out DDRB,rmp
 ; Enable sleep model IDLE
 		ldi rmp,(1<<SE | 1<<SM1) ; enable sleep
@@ -134,4 +131,4 @@ WDT_Prescaler_Change:
 		ret
 ;
 ; End of source code
-;		
+;

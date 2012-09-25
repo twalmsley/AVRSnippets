@@ -42,6 +42,11 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrAssembler>
+  <avrasm.assembler.general.AdditionalIncludeDirectories>
+    <ListValues>
+      <Value>../../../AOSDAssyLib/includes</Value>
+    </ListValues>
+  </avrasm.assembler.general.AdditionalIncludeDirectories>
   <avrasm.assembler.general.IncludeFile>($IncludeFile)</avrasm.assembler.general.IncludeFile>
 </AvrAssembler>
     </ToolchainSettings>
