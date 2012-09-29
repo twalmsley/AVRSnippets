@@ -124,6 +124,10 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CharMap.h">
+      <SubType>compile</SubType>
+      <Link>CharMap.h</Link>
+    </Compile>
     <Compile Include="LedArrayDriver.cpp">
       <SubType>compile</SubType>
     </Compile>
