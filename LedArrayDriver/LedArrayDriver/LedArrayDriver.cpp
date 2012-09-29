@@ -9,8 +9,8 @@
 #include <avr/delay.h>
 #include <string.h>
 
-#define SHIFT_PAUSE				1000
-#define LED_PAUSE				100
+#define SHIFT_PAUSE				10000
+#define LED_PAUSE				10000
 #define COLUMNS_PER_CHARACTER	8
 #define ROWS_PER_CHARACTER		7
 #define NBR_OF_DISPLAY_COLUMNS  80
@@ -624,7 +624,7 @@ uint8_t * getMatrix(char letter) {
 		default: return letter_question;
 	}
 }
-
+/*
 void send(char letter) {
 	uint8_t *matrix = getMatrix(letter);
 	//
@@ -675,4 +675,21 @@ int main(void) {
 		}
 	} FOREVER;
 }
-
+*/
+int main(void) {
+	char *message = "HELLO WORLD";
+	//
+	//Set up the DDR registers for output
+	//
+	DDR_DATA_PORT = 0xFF;
+	DDR_CLOCK_PORT = _BV(clockBit);
+	DATA_PORT = 0;
+	SHIFT1
+	uint8_t val = 0;
+	do
+	{
+		DATA_PORT = val & ~_BV(shiftRegBit);
+		val++;
+		_delay_ms(100);
+	} FOREVER;
+}
