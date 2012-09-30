@@ -85,7 +85,7 @@ uint8_t * getMatrix(char letter) {
 		default: return letter_question;
 	}
 }
-/*
+
 void send(char letter) {
 	uint8_t *matrix = getMatrix(letter);
 	//
@@ -134,23 +134,5 @@ int main(void) {
 		while(*messagePtr) {
 			send(*messagePtr++);
 		}
-	} FOREVER;
-}
-*/
-int main(void) {
-	char *message = "HELLO WORLD";
-	//
-	//Set up the DDR registers for output
-	//
-	DDR_DATA_PORT = 0xFF;
-	DDR_CLOCK_PORT = _BV(clockBit);
-	DATA_PORT = 0;
-	SHIFT1
-	uint8_t val = 0;
-	do
-	{
-		DATA_PORT = val & ~_BV(shiftRegBit);
-		val++;
-		_delay_ms(100);
 	} FOREVER;
 }
