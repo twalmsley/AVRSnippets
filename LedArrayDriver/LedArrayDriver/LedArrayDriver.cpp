@@ -79,7 +79,7 @@ uint8_t * getMatrix(char letter) {
 		default: return letter_question;
 	}
 }
-/*
+
 void send(char letter) {
 	uint8_t *matrix = getMatrix(letter);
 	//
