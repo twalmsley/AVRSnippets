@@ -17,18 +17,12 @@
 #define NBR_OF_DISPLAY_COLUMNS  80
 #define FOREVER					while(1)
 
-// pin 22 - PA0 - 74LS138 CS pin
-#define chipSelect PORTA0
-// pin 26 - PA4 - input A
-#define databit0 PORTA4
-// pin 25 - PA3 - input B
-#define databit1 PORTA3
-// pin 24 - PA2 - input C
-#define databit2 PORTA2
-//pin 28 = bit7 = PA7 - shiftRegBit
-#define shiftRegBit PORTA6
-//pin 31 = bit8 = PC6 - clock
-#define clockBit PORTC6
+#define chipSelect PORTA1
+#define databit0 PORTA5
+#define databit1 PORTA4
+#define databit2 PORTA3
+#define shiftRegBit PORTA7
+#define clockBit PORTC7
 
 #define CLOCK_PORT		PORTC
 #define DATA_PORT		PORTA
@@ -134,5 +128,19 @@ int main(void) {
 		while(*messagePtr) {
 			send(*messagePtr++);
 		}
+	} FOREVER;
+}
+*/
+int main(void) {
+	DDR_DATA_PORT = 0xFF;
+	DDR_CLOCK_PORT = _BV(clockBit);
+	DATA_PORT = 0;
+	SHIFT1
+	uint8_t val = 0;
+	do
+	{
+		DATA_PORT = val & ~_BV(shiftRegBit);
+		val++;
+		_delay_ms(100);
 	} FOREVER;
 }
