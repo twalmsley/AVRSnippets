@@ -10,19 +10,23 @@
 #include <string.h>
 #include "CharMap.h"
 
-#define SHIFT_PAUSE				10000
-#define LED_PAUSE				10000
+#define SHIFT_PAUSE				75
+#define LED_PAUSE				75
 #define COLUMNS_PER_CHARACTER	8
 #define ROWS_PER_CHARACTER		7
 #define NBR_OF_DISPLAY_COLUMNS  80
 #define FOREVER					while(1)
 
+// Normally high
 #define chipSelect PORTA1
-#define databit0 PORTA5
+#define databit0 PORTA3
 #define databit1 PORTA4
-#define databit2 PORTA3
+#define databit2 PORTA5
+// Normally low
 #define shiftRegBit PORTA7
 #define clockBit PORTC7
+
+#define GND PORTA0
 
 #define CLOCK_PORT		PORTC
 #define DATA_PORT		PORTA
@@ -85,17 +89,17 @@ void send(char letter) {
 	//
 	// Each character has a number of columns
 	//
-	for (uint8_t column = 0; column < COLUMNS_PER_CHARACTER; column++) {
+	for (uint8_t column = COLUMNS_PER_CHARACTER; column >0; column--) {
 		//
 		// Process each bit in the column
 		//
-		for(uint8_t row = 0; row < ROWS_PER_CHARACTER; row++) {
-			uint8_t pattern = matrix[row];
+		for(uint8_t row = 0; row <= ROWS_PER_CHARACTER; row++) {
+			uint8_t pattern = matrix[ROWS_PER_CHARACTER-row];
 			if(pattern & _BV(column)) {
 				//
 				// The bit is set so light the LED in the row
 				//
-				DATA_PORT = (row << 2) | _BV(chipSelect);
+				DATA_PORT = (row << 3) ;//| _BV(chipSelect);
 				_delay_us(LED_PAUSE);
 			}
 		}
@@ -105,11 +109,11 @@ void send(char letter) {
 		DATA_PORT = 0;
 		SHIFT0
 	}
-	
+
 }
 
 int main(void) {
-	char *message = "HELLO WORLD";
+	char *message = "SWINDON HACKSPACE!";
 	//
 	//Set up the DDR registers for output
 	//
@@ -125,22 +129,9 @@ int main(void) {
 		//
 		// Process each character in the message
 		//
-		while(*messagePtr) {
+		int count = 0;
+		while(*messagePtr && count++ < 10) {
 			send(*messagePtr++);
 		}
-	} FOREVER;
-}
-*/
-int main(void) {
-	DDR_DATA_PORT = 0xFF;
-	DDR_CLOCK_PORT = _BV(clockBit);
-	DATA_PORT = 0;
-	SHIFT1
-	uint8_t val = 0;
-	do
-	{
-		DATA_PORT = val & ~_BV(shiftRegBit);
-		val++;
-		_delay_ms(100);
 	} FOREVER;
 }
