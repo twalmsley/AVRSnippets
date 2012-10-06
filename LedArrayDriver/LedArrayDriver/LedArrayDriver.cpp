@@ -10,7 +10,7 @@
 #include <string.h>
 #include "CharMap.h"
 
-#define SHIFT_PAUSE				75
+#define SHIFT_PAUSE				15
 #define LED_PAUSE				75
 #define COLUMNS_PER_CHARACTER	8
 #define ROWS_PER_CHARACTER		7
@@ -39,7 +39,12 @@
 #define SHIFT_REG_OFF	DATA_PORT &= ~_BV(shiftRegBit);
 
 #define SHIFT0			CLOCK_OFF SHIFT_REG_OFF _delay_us(SHIFT_PAUSE); CLOCK_ON
-#define SHIFT1			CLOCK_OFF SHIFT_REG_ON _delay_us(SHIFT_PAUSE); CLOCK_ON
+#define SHIFT1			CLOCK_OFF SHIFT_REG_ON CLOCK_ON _delay_us(SHIFT_PAUSE); CLOCK_OFF
+
+#define BUFFERSIZE 1000
+
+uint8_t displayBuffer[BUFFERSIZE];
+uint16_t displayPtr = 0;
 
 uint8_t * getMatrix(char letter) {
 	switch(letter) {
@@ -84,22 +89,39 @@ uint8_t * getMatrix(char letter) {
 	}
 }
 
-void send(char letter) {
+void buffer(char letter) {
 	uint8_t *matrix = getMatrix(letter);
 	//
 	// Each character has a number of columns
 	//
-	for (uint8_t column = COLUMNS_PER_CHARACTER; column >0; column--) {
+	for (uint8_t column = COLUMNS_PER_CHARACTER; column >0 ; column--) {
 		//
 		// Process each bit in the column
 		//
+		uint8_t result = 0;
 		for(uint8_t row = 0; row <= ROWS_PER_CHARACTER; row++) {
-			uint8_t pattern = matrix[ROWS_PER_CHARACTER-row];
+			uint8_t pattern = matrix[row];
 			if(pattern & _BV(column)) {
+				displayBuffer[displayPtr] |= _BV(ROWS_PER_CHARACTER-row);
+			}
+		}
+		displayPtr++;
+	}
+
+}
+
+void send(uint8_t position) {
+		//
+		// Process each bit in the column
+		//
+		uint8_t pattern = displayBuffer[position];
+
+		for(uint8_t row = 0; row <= ROWS_PER_CHARACTER; row++) {
+			if(pattern & _BV(row)) {
 				//
 				// The bit is set so light the LED in the row
 				//
-				DATA_PORT = (row << 3) ;//| _BV(chipSelect);
+				DATA_PORT = (row << 3) ;
 				_delay_us(LED_PAUSE);
 			}
 		}
@@ -108,30 +130,36 @@ void send(char letter) {
 		//
 		DATA_PORT = 0;
 		SHIFT0
-	}
-
 }
 
 int main(void) {
-	char *message = "SWINDON HACKSPACE!";
+	char *message = "WELCOME TO SWINDON HACKSPACE";
+	char *messagePtr = message;
+	while(*messagePtr) {
+		buffer(*messagePtr++);
+	}
 	//
 	//Set up the DDR registers for output
 	//
+	DATA_PORT = 0;
+	CLOCK_PORT = 0;
 	DDR_DATA_PORT = _BV(chipSelect)|_BV(databit0)|_BV(databit1)|_BV(databit2)|_BV(shiftRegBit);
 	DDR_CLOCK_PORT = _BV(clockBit);
 	do
 	{
-		char *messagePtr = message;
+		for(uint16_t offset = 0;offset<920;offset++) {
 		//
 		// Set up and clock-in the first shift register bit
 		//
 		SHIFT1
 		//
-		// Process each character in the message
+		// Process each column in the buffer
 		//
-		int count = 0;
-		while(*messagePtr && count++ < 10) {
-			send(*messagePtr++);
+			uint16_t count = 0;
+			while(count <= 80) {
+				send((offset/2)+count);
+				count++;
+			}
 		}
 	} FOREVER;
 }
