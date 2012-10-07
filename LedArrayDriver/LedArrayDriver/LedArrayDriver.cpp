@@ -4,162 +4,81 @@
 * Created: 29/08/2012 21:07:41
 *  Author: tony walmsley
 */
-#define F_CPU 16000000
-#include <avr/io.h>
-#include <avr/delay.h>
-#include <string.h>
-#include "CharMap.h"
+#include "LedArrayDriver.h"
 
-#define SHIFT_PAUSE				15
-#define LED_PAUSE				75
-#define COLUMNS_PER_CHARACTER	8
-#define ROWS_PER_CHARACTER		7
-#define NBR_OF_DISPLAY_COLUMNS  80
-#define FOREVER					while(1)
-
-// Normally high
-#define chipSelect PORTA1
-#define databit0 PORTA3
-#define databit1 PORTA4
-#define databit2 PORTA5
-// Normally low
-#define shiftRegBit PORTA7
-#define clockBit PORTC7
-
-#define GND PORTA0
-
-#define CLOCK_PORT		PORTC
-#define DATA_PORT		PORTA
-#define DDR_DATA_PORT	DDRA
-#define DDR_CLOCK_PORT	DDRC
-
-#define CLOCK_OFF		CLOCK_PORT &= ~_BV(clockBit);
-#define CLOCK_ON		CLOCK_PORT |= _BV(clockBit);
-#define SHIFT_REG_ON	DATA_PORT |= _BV(shiftRegBit);
-#define SHIFT_REG_OFF	DATA_PORT &= ~_BV(shiftRegBit);
-
-#define SHIFT0			CLOCK_OFF SHIFT_REG_OFF _delay_us(SHIFT_PAUSE); CLOCK_ON
-#define SHIFT1			CLOCK_OFF SHIFT_REG_ON CLOCK_ON _delay_us(SHIFT_PAUSE); CLOCK_OFF
-
-#define BUFFERSIZE 1000
-
-uint8_t displayBuffer[BUFFERSIZE];
-uint16_t displayPtr = 0;
-
-uint8_t * getMatrix(char letter) {
-	switch(letter) {
-		case 'A': return letter_A;
-		case 'B': return letter_B;
-		case 'C': return letter_C;
-		case 'D': return letter_D;
-		case 'E': return letter_E;
-		case 'F': return letter_F;
-		case 'G': return letter_G;
-		case 'H': return letter_H;
-		case 'I': return letter_I;
-		case 'J': return letter_J;
-		case 'K': return letter_K;
-		case 'L': return letter_L;
-		case 'M': return letter_M;
-		case 'N': return letter_N;
-		case 'O': return letter_O;
-		case 'P': return letter_P;
-		case 'Q': return letter_Q;
-		case 'R': return letter_R;
-		case 'S': return letter_S;
-		case 'T': return letter_T;
-		case 'U': return letter_U;
-		case 'V': return letter_V;
-		case 'W': return letter_W;
-		case 'X': return letter_X;
-		case 'Y': return letter_Y;
-		case 'Z': return letter_Z;
-		case '0': return letter_0;
-		case '1': return letter_1;
-		case '2': return letter_2;
-		case '3': return letter_3;
-		case '4': return letter_4;
-		case '5': return letter_5;
-		case '6': return letter_6;
-		case '7': return letter_7;
-		case '8': return letter_8;
-		case '9': return letter_9;
-		case ' ': return space;
-		default: return letter_question;
-	}
-}
-
-void buffer(char letter) {
-	uint8_t *matrix = getMatrix(letter);
-	//
-	// Each character has a number of columns
-	//
-	for (uint8_t column = COLUMNS_PER_CHARACTER; column >0 ; column--) {
-		//
-		// Process each bit in the column
-		//
-		uint8_t result = 0;
-		for(uint8_t row = 0; row <= ROWS_PER_CHARACTER; row++) {
-			uint8_t pattern = matrix[row];
-			if(pattern & _BV(column)) {
-				displayBuffer[displayPtr] |= _BV(ROWS_PER_CHARACTER-row);
-			}
-		}
-		displayPtr++;
-	}
+LedArrayDriver::LedArrayDriver(	PortPin *clock,
+								PortPin *chipSelect,
+								PortPin *shift,
+								PortPin *a,
+								PortPin *b,
+								PortPin *c,
+								uint8_t rows,
+								uint16_t columns)
+	:	_clock(clock),
+		_chipSelect(chipSelect),
+		_shift(shift),
+		_a(a),
+		_b(b),
+		_c(c),
+		_rows(rows),
+		_columns(columns) {
 
 }
 
-void send(uint8_t position) {
-		//
-		// Process each bit in the column
-		//
-		uint8_t pattern = displayBuffer[position];
-
-		for(uint8_t row = 0; row <= ROWS_PER_CHARACTER; row++) {
-			if(pattern & _BV(row)) {
-				//
-				// The bit is set so light the LED in the row
-				//
-				DATA_PORT = (row << 3) ;
-				_delay_us(LED_PAUSE);
-			}
-		}
-		//
-		// Clear the column and move to the next one
-		//
-		DATA_PORT = 0;
-		SHIFT0
+LedArrayDriver::~LedArrayDriver() {
 }
 
-int main(void) {
-	char *message = "WELCOME TO SWINDON HACKSPACE";
-	char *messagePtr = message;
-	while(*messagePtr) {
-		buffer(*messagePtr++);
+void LedArrayDriver::init() {
+	_clock->setAsOutput();
+	_clock->clear();
+	_chipSelect->setAsOutput();
+	_chipSelect->set();
+	_shift->setAsOutput();
+	_shift->clear();
+	_a->setAsOutput();
+	_a->clear();
+	_b->setAsOutput();
+	_b->clear();
+	_c->setAsOutput();
+	_c->clear();
+
+	clearDisplay();
+}
+
+void LedArrayDriver::clearDisplay() {
+	_shift->clear();
+	for(uint16_t col = 0;col <_columns;col++) {
+		_clock->pulse(PULSE_MILLIS);
+	}
+}
+
+void LedArrayDriver::begin() {
+	_shift->set();
+	_clock->pulse(PULSE_MILLIS);
+	_shift->clear();
+}
+
+void LedArrayDriver::nextColumn() {
+	_clock->pulse(PULSE_MILLIS);
+}
+
+void LedArrayDriver::show(uint8_t bits) {
+
+	for(uint8_t row = 1; row <= _rows; row++) {
+		if(bits & _BV(row-1)) {
+			//
+			// The bit is set so light the LED in the row
+			//
+			(row & 1) ?_a->set():_a->clear();
+			(row & 2) ?_b->set():_b->clear();
+			(row & 4) ?_c->set():_c->clear();
+		}
+		_delay_us(LED_PAUSE);
 	}
 	//
-	//Set up the DDR registers for output
+	// Clear the column and move to the next one
 	//
-	DATA_PORT = 0;
-	CLOCK_PORT = 0;
-	DDR_DATA_PORT = _BV(chipSelect)|_BV(databit0)|_BV(databit1)|_BV(databit2)|_BV(shiftRegBit);
-	DDR_CLOCK_PORT = _BV(clockBit);
-	do
-	{
-		for(uint16_t offset = 0;offset<920;offset++) {
-		//
-		// Set up and clock-in the first shift register bit
-		//
-		SHIFT1
-		//
-		// Process each column in the buffer
-		//
-			uint16_t count = 0;
-			while(count <= 80) {
-				send((offset/2)+count);
-				count++;
-			}
-		}
-	} FOREVER;
+	_a->clear();
+	_b->clear();
+	_c->clear();
 }
