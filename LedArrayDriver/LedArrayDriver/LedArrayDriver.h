@@ -6,10 +6,18 @@
 
 #define PULSE_MILLIS	15
 #define LED_PAUSE		75
+#define LED_FADE_PAUSE	25
 
 class LedArrayDriver {
 	public:
-		LedArrayDriver(PortPin *clock, PortPin *chipSelect, PortPin *shift, PortPin *a, PortPin *b, PortPin *c, uint8_t rows, uint16_t columns);
+		LedArrayDriver(	PortPin *clock, 
+						PortPin *chipSelect, 
+						PortPin *shift, 
+						PortPin *a, 
+						PortPin *b, 
+						PortPin *c, 
+						uint8_t rows, 
+						uint16_t columns);
 		~LedArrayDriver();
 
 		void init();
@@ -19,7 +27,6 @@ class LedArrayDriver {
 		void show(uint8_t bits);
 		void nextColumn();
 	private:
-
 		PortPin *_clock;
 		PortPin *_chipSelect;
 		PortPin *_shift;

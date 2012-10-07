@@ -77,5 +77,5 @@ void LedArrayDriver::show(uint8_t bits) {
 	// Clear the column and move to the next one
 	//
 	_a->set(0);
-	_delay_us(LED_PAUSE);
+	_delay_us(LED_FADE_PAUSE);
 }
