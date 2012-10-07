@@ -11,6 +11,7 @@ class PortPin {
 		void setAsOutput();
 		void setAsInput();
 		void set();
+		void set(uint8_t val);
 		void clear();
 		uint8_t read();
 		void toggle();
@@ -20,5 +21,6 @@ class PortPin {
 		volatile uint8_t *_port;
 		volatile uint8_t *_inPort;
 		uint8_t _pinMask;
+		uint8_t _pin;
 };
 #endif

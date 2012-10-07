@@ -165,12 +165,12 @@ int oldmain(void) {
 	} FOREVER;
 }
 
-#define MY_DDRA ((volatile uint8_t *)0x01)
-#define MY_DDRC ((volatile uint8_t *)0x07)
-#define MY_PORTA ((volatile uint8_t *)0x02)
-#define MY_PORTC ((volatile uint8_t *)0x08)
-#define MY_PINA ((volatile uint8_t *)0x00)
-#define MY_PINC ((volatile uint8_t *)0x06)
+#define MY_DDRA ((volatile uint8_t *)0x21)
+#define MY_DDRC ((volatile uint8_t *)0x27)
+#define MY_PORTA ((volatile uint8_t *)0x22)
+#define MY_PORTC ((volatile uint8_t *)0x28)
+#define MY_PINA ((volatile uint8_t *)0x20)
+#define MY_PINC ((volatile uint8_t *)0x26)
 
 int main(void) {
 	PortPin clock(MY_DDRC, MY_PORTC, MY_PINC, clockBit);

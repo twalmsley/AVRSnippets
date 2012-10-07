@@ -32,7 +32,7 @@ void LedArrayDriver::init() {
 	_clock->setAsOutput();
 	_clock->clear();
 	_chipSelect->setAsOutput();
-	_chipSelect->set();
+	_chipSelect->clear();
 	_shift->setAsOutput();
 	_shift->clear();
 	_a->setAsOutput();
@@ -69,16 +69,13 @@ void LedArrayDriver::show(uint8_t bits) {
 			//
 			// The bit is set so light the LED in the row
 			//
-			(row & 1) ?_a->set():_a->clear();
-			(row & 2) ?_b->set():_b->clear();
-			(row & 4) ?_c->set():_c->clear();
+			_a->set(row);
 		}
 		_delay_us(LED_PAUSE);
 	}
 	//
 	// Clear the column and move to the next one
 	//
-	_a->clear();
-	_b->clear();
-	_c->clear();
+	_a->set(0);
+	_delay_us(LED_PAUSE);
 }

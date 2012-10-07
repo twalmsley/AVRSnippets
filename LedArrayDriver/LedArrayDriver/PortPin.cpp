@@ -5,7 +5,7 @@
 #define FALSE ((uint8_t)0)
 
 PortPin::PortPin(volatile uint8_t *ddr, volatile uint8_t *port, volatile uint8_t *inPort, uint8_t pin)
-	:_ddr(ddr),_port(port),_inPort(inPort), _pinMask(_BV(pin)){
+	:_ddr(ddr),_port(port),_inPort(inPort), _pinMask(_BV(pin)), _pin(pin) {
 }
 
 PortPin::~PortPin(){
@@ -22,6 +22,11 @@ void PortPin::setAsInput(){
 
 void PortPin::set(){
 	*_port |= _pinMask;
+}
+
+void PortPin::set(uint8_t val){
+	val <<= _pin;
+	*_port = val;
 }
 
 void PortPin::clear(){
