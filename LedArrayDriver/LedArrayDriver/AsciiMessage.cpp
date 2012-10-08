@@ -103,7 +103,6 @@ uint8_t ascii[][5] = {
 };
 
 AsciiMessage::AsciiMessage(char *message):_message(message){}
-
 /* Convert a character into a 6x7 bit pattern
  * including a blank column as a separator.
  *
@@ -131,7 +130,7 @@ void AsciiMessage::buffer(uint8_t *dest) {
 		// Add a blank column as a spacer
 		//
 		*dest++ = 0;
-	}	
+	}
 }
 
 uint16_t AsciiMessage::getLength() {

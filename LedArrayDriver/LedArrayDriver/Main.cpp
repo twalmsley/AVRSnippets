@@ -7,6 +7,7 @@
 #define F_CPU 16000000
 #include <avr/io.h>
 #include "LedArrayDriver.h"
+#include "Message.h"
 #include "AsciiMessage.h"
 
 #define MY_DDRA ((volatile uint8_t *)0x21)
@@ -29,6 +30,13 @@
 uint8_t displayBuffer[BUFFERSIZE];
 uint16_t displayPtr = 0;
 
+//
+// Fix a compile error - see http://stackoverflow.com/questions/920500/what-is-the-purpose-of-cxa-pure-virtual for details.
+//
+extern "C" void __cxa_pure_virtual() { while (1); }
+//
+// The main entry point
+//
 int main(void) {
 	//
 	// Create a set of objects representing the output pins

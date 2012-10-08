@@ -2,8 +2,9 @@
 #define ASCII_MESSAGE
 
 #include <stdint.h>
+#include "Message.h"
 
-class AsciiMessage {
+class AsciiMessage : public Message {
 	public:
 		AsciiMessage(char *message);
 		~AsciiMessage();
