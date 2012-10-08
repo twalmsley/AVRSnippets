@@ -6,10 +6,8 @@
 */
 #define F_CPU 16000000
 #include <avr/io.h>
-#include <avr/delay.h>
-#include <string.h>
 #include "LedArrayDriver.h"
-#include "CharMap.h"
+#include "AsciiMessage.h"
 
 #define MY_DDRA ((volatile uint8_t *)0x21)
 #define MY_DDRC ((volatile uint8_t *)0x27)
@@ -18,43 +16,18 @@
 #define MY_PINA ((volatile uint8_t *)0x20)
 #define MY_PINC ((volatile uint8_t *)0x26)
 
-#define COLUMNS_PER_CHARACTER	5
-#define NBR_OF_DISPLAY_COLUMNS  80
-#define FOREVER					while(1)
-#define SCROLL_DELAY			6
+#define NBR_OF_DISPLAY_COLUMNS  ((uint8_t)80)
+#define NBR_OF_DISPLAY_ROWS		((uint8_t)7)
+#define SCROLL_DELAY			5
 
 #define shiftRegBit PORTA7
 #define clockBit PORTC7
-
+//
+// The raster buffer - much bigger than the actual display to allow scrolling messages.
+//
 #define BUFFERSIZE 1000
-
 uint8_t displayBuffer[BUFFERSIZE];
 uint16_t displayPtr = 0;
-
-void buffer(char letter) {
-	uint8_t *matrix = ascii[letter-32];
-	//
-	// Each character has a number of columns
-	//
-	for (uint8_t column = 0; column < COLUMNS_PER_CHARACTER;column++) {
-		uint8_t pattern = matrix[column];
-		//
-		// The data byte needs to be reversed and shifted to the right 1 place
-		//
-		pattern = ((pattern * 0x0802LU & 0x22110LU) | (pattern * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
-		pattern >>=1;
-		//
-		// Store it in the display buffer and move on.
-		//
-		displayBuffer[displayPtr] = pattern;
-		displayPtr++;
-	}
-	//
-	// Add a blank column as a spacer
-	//
-	displayBuffer[displayPtr] = 0;
-	displayPtr++;
-}
 
 int main(void) {
 	//
@@ -69,20 +42,17 @@ int main(void) {
 	//
 	// Create and initialise the LedArrayDriver
 	//
-	LedArrayDriver led(&clock, &chipSelect, &shift, &a,&b,&c, (uint8_t)7, (uint16_t)80);
+	LedArrayDriver led(&clock, &chipSelect, &shift, &a,&b,&c, NBR_OF_DISPLAY_ROWS, NBR_OF_DISPLAY_COLUMNS);
 	led.init();
 
-	char *message = "                **** Welcome to Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****";
-	uint16_t messageLen = strlen(message);
+	AsciiMessage message("                **** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****");
+	uint16_t messageLen = message.getLength();
 	uint16_t messageCols = messageLen*6;// 6 columns per character
 
 	//
 	// Convert each character to a bit pattern
 	//
-	char *messagePtr = message;
-	while(*messagePtr) {
-		buffer(*messagePtr++);
-	}
+	message.buffer(displayBuffer);
 
 	do
 	{
@@ -102,6 +72,6 @@ int main(void) {
 				count++;
 			}
 		}
-	} FOREVER;
+	} while(1);
 
 }
