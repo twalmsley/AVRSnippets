@@ -124,9 +124,21 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CharMap.h">
+    <Compile Include="Animation.cpp">
       <SubType>compile</SubType>
-      <Link>CharMap.h</Link>
+      <Link>Animation.cpp</Link>
+    </Compile>
+    <Compile Include="Animation.h">
+      <SubType>compile</SubType>
+      <Link>Animation.h</Link>
+    </Compile>
+    <Compile Include="AsciiMessage.cpp">
+      <SubType>compile</SubType>
+      <Link>AsciiMessage.cpp</Link>
+    </Compile>
+    <Compile Include="AsciiMessage.h">
+      <SubType>compile</SubType>
+      <Link>AsciiMessage.h</Link>
     </Compile>
     <Compile Include="LedArrayDriver.cpp">
       <SubType>compile</SubType>
@@ -135,9 +147,25 @@
       <SubType>compile</SubType>
       <Link>LedArrayDriver.h</Link>
     </Compile>
+    <Compile Include="LeftScroller.cpp">
+      <SubType>compile</SubType>
+      <Link>LeftScroller.cpp</Link>
+    </Compile>
+    <Compile Include="LeftScroller.h">
+      <SubType>compile</SubType>
+      <Link>LeftScroller.h</Link>
+    </Compile>
     <Compile Include="Main.cpp">
       <SubType>compile</SubType>
       <Link>Main.cpp</Link>
+    </Compile>
+    <Compile Include="Message.cpp">
+      <SubType>compile</SubType>
+      <Link>Message.cpp</Link>
+    </Compile>
+    <Compile Include="Message.h">
+      <SubType>compile</SubType>
+      <Link>Message.h</Link>
     </Compile>
     <Compile Include="PortPin.cpp">
       <SubType>compile</SubType>
