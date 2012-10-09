@@ -1,5 +1,5 @@
 ﻿#include <string.h>
-
+#include <stdlib.h>
 #include "AsciiMessage.h"
 
 #define COLUMNS_PER_CHARACTER	5
@@ -134,5 +134,13 @@ void AsciiMessage::buffer(uint8_t *dest) {
 }
 
 uint16_t AsciiMessage::getLength() {
-	return strlen(_message);
+	return 6*strlen(_message);
+}
+
+void* AsciiMessage::operator new(size_t size) {
+	return malloc(size);
+}
+
+void AsciiMessage::operator delete(void* ptr) {
+	free(ptr);
 }

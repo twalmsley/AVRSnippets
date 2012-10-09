@@ -9,6 +9,7 @@
 #include "LedArrayDriver.h"
 #include "Message.h"
 #include "AsciiMessage.h"
+#include "LeftScroller.h"
 
 #define MY_DDRA ((volatile uint8_t *)0x21)
 #define MY_DDRC ((volatile uint8_t *)0x27)
@@ -23,12 +24,6 @@
 
 #define shiftRegBit PORTA7
 #define clockBit PORTC7
-//
-// The raster buffer - much bigger than the actual display to allow scrolling messages.
-//
-#define BUFFERSIZE 1000
-uint8_t displayBuffer[BUFFERSIZE];
-uint16_t displayPtr = 0;
 
 //
 // Fix a compile error - see http://stackoverflow.com/questions/920500/what-is-the-purpose-of-cxa-pure-virtual for details.
@@ -53,9 +48,19 @@ int main(void) {
 	LedArrayDriver led(&clock, &chipSelect, &shift, &a,&b,&c, NBR_OF_DISPLAY_ROWS, NBR_OF_DISPLAY_COLUMNS);
 	led.init();
 
-	AsciiMessage message("                **** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****");
-	uint16_t messageLen = message.getLength();
-	uint16_t messageCols = messageLen*6;// 6 columns per character
+	Message &message = *(new AsciiMessage("                **** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****"));
+
+	Animation &scrollLeft = *(new LeftScroller(led, message, 5));
+	scrollLeft.init();
+	do
+	{
+		scrollLeft.animate();
+
+	} while(1);
+
+}
+/*
+int oldmain(void) {
 
 	//
 	// Convert each character to a bit pattern
@@ -83,3 +88,4 @@ int main(void) {
 	} while(1);
 
 }
+*/
