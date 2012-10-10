@@ -9,6 +9,7 @@
 #include "LedArrayDriver.h"
 #include "Message.h"
 #include "AsciiMessage.h"
+#include "GraphicMessage.h"
 #include "LeftScroller.h"
 
 #define MY_DDRA ((volatile uint8_t *)0x21)
@@ -45,13 +46,124 @@ int main(void) {
 	LedArrayDriver led(&clock, &chipSelect, &shift, &a,&b,&c, NBR_OF_DISPLAY_ROWS, NBR_OF_DISPLAY_COLUMNS);
 	led.init();
 
-	Message &message = *(new AsciiMessage("                **** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****"));
+	uint8_t graphic[180] = {
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000,
+		0b00011000,
+		0b01111001,
+		0b01111110,
+		0b01011000,
+		0b01111000,
+		0b01011110,
+		0b01111001,
+		0b00011000,
+		0b00000000,
+		0b00000000
+		};
+	Message &message1 = *(new AsciiMessage("                **** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****"));
+	Message &message2 = *(new GraphicMessage(graphic, 180));
 
-	Animation &scrollLeft = *(new LeftScroller(led, message, 5));
-	scrollLeft.init();
+	Animation &scrollLeft1 = *(new LeftScroller(led, message1, 3));
+	Animation &scrollLeft2 = *(new LeftScroller(led, message2, 6));
 	do
 	{
-		scrollLeft.animate();
-
+		while(scrollLeft1.animate());
+		while(scrollLeft2.animate());
 	} while(1);
 }

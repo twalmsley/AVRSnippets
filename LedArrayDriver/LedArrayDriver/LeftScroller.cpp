@@ -1,7 +1,7 @@
 ﻿#include "LeftScroller.h"
 
 LeftScroller::LeftScroller(LedArrayDriver &ledArray, Message &message, uint8_t repeats):Animation(ledArray, repeats), _message(message) {
-
+	init();
 }
 
 LeftScroller::~LeftScroller() {
@@ -12,7 +12,7 @@ void LeftScroller::init() {
 	_message.buffer(_displayBuffer);
 }
 
-void LeftScroller::animate() {
+uint8_t LeftScroller::animate() {
 	//
 	// Set up and clock-in the first shift register bit
 	//
@@ -32,12 +32,14 @@ void LeftScroller::animate() {
 		_displayIndex++;
 		if(_displayIndex > _message.getLength()) {
 			_displayIndex = 0;
+			return (uint8_t)0;
 		}
-	}	
+	}
+	return (uint8_t)1;
 }
 
 void* LeftScroller::operator new(size_t size) {
-	return malloc(size);
+	return calloc(size, (size_t)1);
 }
 
 void LeftScroller::operator delete(void* ptr) {

@@ -140,6 +140,14 @@
       <SubType>compile</SubType>
       <Link>AsciiMessage.h</Link>
     </Compile>
+    <Compile Include="GraphicMessage.cpp">
+      <SubType>compile</SubType>
+      <Link>GraphicMessage.cpp</Link>
+    </Compile>
+    <Compile Include="GraphicMessage.h">
+      <SubType>compile</SubType>
+      <Link>GraphicMessage.h</Link>
+    </Compile>
     <Compile Include="LedArrayDriver.cpp">
       <SubType>compile</SubType>
     </Compile>

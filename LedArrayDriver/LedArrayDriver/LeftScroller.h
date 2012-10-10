@@ -12,7 +12,7 @@ class LeftScroller : public Animation {
 		~LeftScroller();
 
 		virtual void init();
-		virtual void animate();
+		virtual uint8_t animate();
 
         void* operator new(size_t size);
         void operator delete(void*);

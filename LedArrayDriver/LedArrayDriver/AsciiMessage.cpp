@@ -138,7 +138,7 @@ uint16_t AsciiMessage::getLength() {
 }
 
 void* AsciiMessage::operator new(size_t size) {
-	return malloc(size);
+	return calloc(size, (size_t)1);
 }
 
 void AsciiMessage::operator delete(void* ptr) {

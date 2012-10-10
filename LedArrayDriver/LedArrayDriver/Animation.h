@@ -10,7 +10,7 @@ class Animation {
 		Animation(LedArrayDriver &ledArray, uint8_t repeats);
 		~Animation();
 		virtual void init() = 0;
-		virtual void animate() = 0;
+		virtual uint8_t animate() = 0;
 	protected:
 		LedArrayDriver &_ledArray;
 		uint8_t _displayBuffer[BUFFERSIZE];
