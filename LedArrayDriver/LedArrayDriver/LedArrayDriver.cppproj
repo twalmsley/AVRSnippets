@@ -183,6 +183,14 @@
       <SubType>compile</SubType>
       <Link>PortPin.h</Link>
     </Compile>
+    <Compile Include="StaticDisplay.cpp">
+      <SubType>compile</SubType>
+      <Link>StaticDisplay.cpp</Link>
+    </Compile>
+    <Compile Include="StaticDisplay.h">
+      <SubType>compile</SubType>
+      <Link>StaticDisplay.h</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

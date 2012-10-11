@@ -11,6 +11,7 @@
 #include "AsciiMessage.h"
 #include "GraphicMessage.h"
 #include "LeftScroller.h"
+#include "StaticDisplay.h"
 
 #define MY_DDRA ((volatile uint8_t *)0x21)
 #define MY_DDRC ((volatile uint8_t *)0x27)
@@ -46,15 +47,7 @@ int main(void) {
 	LedArrayDriver led(&clock, &chipSelect, &shift, &a,&b,&c, NBR_OF_DISPLAY_ROWS, NBR_OF_DISPLAY_COLUMNS);
 	led.init();
 
-	uint8_t graphic[180] = {
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
+	uint8_t graphic[100] = {
 		0b00011000,
 		0b01111001,
 		0b01111110,
@@ -157,13 +150,13 @@ int main(void) {
 		0b00000000
 		};
 	Message &message1 = *(new AsciiMessage("                **** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****"));
-	Message &message2 = *(new GraphicMessage(graphic, 180));
+	Message &message2 = *(new GraphicMessage(graphic, 100));
 
 	Animation &scrollLeft1 = *(new LeftScroller(led, message1, 3));
-	Animation &scrollLeft2 = *(new LeftScroller(led, message2, 6));
+	Animation &staticDisplay = *(new StaticDisplay(led, message2, 255));
 	do
 	{
+		while(staticDisplay.animate());
 		while(scrollLeft1.animate());
-		while(scrollLeft2.animate());
 	} while(1);
 }
