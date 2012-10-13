@@ -140,6 +140,14 @@
       <SubType>compile</SubType>
       <Link>AsciiMessage.h</Link>
     </Compile>
+    <Compile Include="AVRPortPin.cpp">
+      <SubType>compile</SubType>
+      <Link>AVRPortPin.cpp</Link>
+    </Compile>
+    <Compile Include="AVRPortPin.h">
+      <SubType>compile</SubType>
+      <Link>AVRPortPin.h</Link>
+    </Compile>
     <Compile Include="GraphicMessage.cpp">
       <SubType>compile</SubType>
       <Link>GraphicMessage.cpp</Link>
@@ -190,6 +198,14 @@
     <Compile Include="StaticDisplay.h">
       <SubType>compile</SubType>
       <Link>StaticDisplay.h</Link>
+    </Compile>
+    <Compile Include="StellarisPortPin.cpp">
+      <SubType>compile</SubType>
+      <Link>StellarisPortPin.cpp</Link>
+    </Compile>
+    <Compile Include="StellarisPortPin.h">
+      <SubType>compile</SubType>
+      <Link>StellarisPortPin.h</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />

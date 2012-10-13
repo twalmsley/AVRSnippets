@@ -6,6 +6,7 @@
 */
 #define F_CPU 16000000
 #include <avr/io.h>
+#include "AVRPortPin.h"
 #include "LedArrayDriver.h"
 #include "Message.h"
 #include "AsciiMessage.h"
@@ -35,12 +36,12 @@ int main(void) {
 	//
 	// Create a set of objects representing the output pins
 	//
-	PortPin clock(MY_DDRC, MY_PORTC, MY_PINC, PORTC7);
-	PortPin shift(MY_DDRA, MY_PORTA, MY_PINA, PORTA7);
-	PortPin chipSelect(MY_DDRA, MY_PORTA, MY_PINA, PORTA1);
-	PortPin a(MY_DDRA, MY_PORTA, MY_PINA, PORTA3);
-	PortPin b(MY_DDRA, MY_PORTA, MY_PINA, PORTA4);
-	PortPin c(MY_DDRA, MY_PORTA, MY_PINA, PORTA5);
+	AVRPortPin clock(MY_DDRC, MY_PORTC, MY_PINC, PORTC7);
+	AVRPortPin shift(MY_DDRA, MY_PORTA, MY_PINA, PORTA7);
+	AVRPortPin chipSelect(MY_DDRA, MY_PORTA, MY_PINA, PORTA1);
+	AVRPortPin a(MY_DDRA, MY_PORTA, MY_PINA, PORTA3);
+	AVRPortPin b(MY_DDRA, MY_PORTA, MY_PINA, PORTA4);
+	AVRPortPin c(MY_DDRA, MY_PORTA, MY_PINA, PORTA5);
 	//
 	// Create and initialise the LedArrayDriver
 	//
