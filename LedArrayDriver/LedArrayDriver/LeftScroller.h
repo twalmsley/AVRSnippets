@@ -18,5 +18,10 @@ class LeftScroller : public Animation {
         void operator delete(void*);
 	private:
 		Message &_message;
+		//
+		// The blank column counts so the message appears from the right.
+		//
+		uint16_t _prefixLen;
+		uint16_t _prefix;
 	};
 #endif

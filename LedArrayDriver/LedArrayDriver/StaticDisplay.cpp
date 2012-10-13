@@ -21,7 +21,7 @@ uint8_t StaticDisplay::animate() {
 	// Process each column in the buffer
 	//
 	uint16_t count = 0;
-	while(count <= 80) {
+	while(count <= _ledArray.numberOfColumns()) {
 		uint8_t pattern = _displayBuffer[count];
 		_ledArray.show(pattern);
 		_ledArray.nextColumn();

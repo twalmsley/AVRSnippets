@@ -79,3 +79,7 @@ void LedArrayDriver::show(uint8_t bits) {
 	_a->set(0);
 	_delay_us(LED_FADE_PAUSE);
 }
+
+uint16_t LedArrayDriver::numberOfColumns() {
+	return _columns;
+}

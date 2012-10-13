@@ -10,13 +10,13 @@
 
 class LedArrayDriver {
 	public:
-		LedArrayDriver(	PortPin *clock, 
-						PortPin *chipSelect, 
-						PortPin *shift, 
-						PortPin *a, 
-						PortPin *b, 
-						PortPin *c, 
-						uint8_t rows, 
+		LedArrayDriver(	PortPin *clock,
+						PortPin *chipSelect,
+						PortPin *shift,
+						PortPin *a,
+						PortPin *b,
+						PortPin *c,
+						uint8_t rows,
 						uint16_t columns);
 		~LedArrayDriver();
 
@@ -26,6 +26,7 @@ class LedArrayDriver {
 		void begin();
 		void show(uint8_t bits);
 		void nextColumn();
+		uint16_t numberOfColumns();
 	private:
 		PortPin *_clock;
 		PortPin *_chipSelect;
