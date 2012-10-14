@@ -11,6 +11,7 @@
 #include "Message.h"
 #include "AsciiMessage.h"
 #include "RepeatedGraphic.h"
+#include "AnimatedGraphic.h"
 #include "LeftScroller.h"
 #include "StaticDisplay.h"
 
@@ -60,14 +61,54 @@ int main(void) {
 		0b00000000,
 		0b00000000
 		};
+
+	uint8_t graphic2[30] =
+	{
+			0b00011000,
+			0b01111001,
+			0b01111110,
+			0b01011000,
+			0b01111000,
+			0b01011110,
+			0b01111001,
+			0b00011000,
+			0b00000000,
+			0b00000000,
+
+			0b00011000,
+			0b01111000,
+			0b01111111,
+			0b01011000,
+			0b01111000,
+			0b01011111,
+			0b01111000,
+			0b00011000,
+			0b00000000,
+			0b00000000,
+
+			0b00011000,
+			0b01111000,
+			0b01111110,
+			0b01011001,
+			0b01111001,
+			0b01011110,
+			0b01111000,
+			0b00011000,
+			0b00000000,
+			0b00000000
+	};
+
 	Message &message1 = *(new AsciiMessage("**** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****"));
 	Message &message2 = *(new RepeatedGraphic(graphic, 10, 8));
+	Message &message3 = *(new AnimatedGraphic(graphic2, 10, 3));// 10 columns * 3 frames
 
 	Animation &scrollLeft1 = *(new LeftScroller(led, message1, 3));
 	Animation &staticDisplay = *(new StaticDisplay(led, message2, 255));
 	Animation &scrollLeft2 = *(new LeftScroller(led, message2, 5));
+	Animation &scrollLeft3 = *(new LeftScroller(led, message3, 10));
 	do
 	{
+		while(scrollLeft3.animate());
 		while(staticDisplay.animate());
 		while(scrollLeft2.animate());
 		while(scrollLeft1.animate());

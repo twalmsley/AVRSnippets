@@ -40,12 +40,13 @@ uint8_t LeftScroller::animate() {
 		count++;
 	}
 	if(_repeatCount++ == _repeats) {
+		_message.buffer(_displayBuffer);
 		_repeatCount = 0;
 		if(_prefix > 0) {
 			_prefix--;
 		} else {
 			_displayIndex++;
-		}		
+		}
 		if(_displayIndex > _message.getLength()) {
 			_displayIndex = 0;
 			_prefix = _prefixLen;

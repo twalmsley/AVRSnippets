@@ -28,6 +28,7 @@ uint8_t StaticDisplay::animate() {
 		count++;
 	}
 	if(_repeatCount++ == _repeats) {
+		init();
 		_repeatCount = 0;
 		return (uint8_t)0;
 	}

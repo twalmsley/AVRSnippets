@@ -124,6 +124,14 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AnimatedGraphic.cpp">
+      <SubType>compile</SubType>
+      <Link>AnimatedGraphic.cpp</Link>
+    </Compile>
+    <Compile Include="AnimatedGraphic.h">
+      <SubType>compile</SubType>
+      <Link>AnimatedGraphic.h</Link>
+    </Compile>
     <Compile Include="Animation.cpp">
       <SubType>compile</SubType>
       <Link>Animation.cpp</Link>
