@@ -156,6 +156,10 @@
       <SubType>compile</SubType>
       <Link>AVRPortPin.h</Link>
     </Compile>
+    <Compile Include="GraphicBitmaps.h">
+      <SubType>compile</SubType>
+      <Link>GraphicBitmaps.h</Link>
+    </Compile>
     <Compile Include="GraphicMessage.cpp">
       <SubType>compile</SubType>
       <Link>GraphicMessage.cpp</Link>
