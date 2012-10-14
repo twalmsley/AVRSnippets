@@ -191,6 +191,14 @@
       <SubType>compile</SubType>
       <Link>PortPin.h</Link>
     </Compile>
+    <Compile Include="RepeatedGraphic.cpp">
+      <SubType>compile</SubType>
+      <Link>RepeatedGraphic.cpp</Link>
+    </Compile>
+    <Compile Include="RepeatedGraphic.h">
+      <SubType>compile</SubType>
+      <Link>RepeatedGraphic.h</Link>
+    </Compile>
     <Compile Include="StaticDisplay.cpp">
       <SubType>compile</SubType>
       <Link>StaticDisplay.cpp</Link>

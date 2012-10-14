@@ -10,7 +10,7 @@
 #include "LedArrayDriver.h"
 #include "Message.h"
 #include "AsciiMessage.h"
-#include "GraphicMessage.h"
+#include "RepeatedGraphic.h"
 #include "LeftScroller.h"
 #include "StaticDisplay.h"
 
@@ -61,13 +61,15 @@ int main(void) {
 		0b00000000
 		};
 	Message &message1 = *(new AsciiMessage("**** Welcome to the Swindon Hackspace at the Museum of Computing - Wednesdays 6:30pm to 10pm ****"));
-	Message &message2 = *(new GraphicMessage(graphic, 10));
+	Message &message2 = *(new RepeatedGraphic(graphic, 10, 8));
 
 	Animation &scrollLeft1 = *(new LeftScroller(led, message1, 3));
 	Animation &staticDisplay = *(new StaticDisplay(led, message2, 255));
+	Animation &scrollLeft2 = *(new LeftScroller(led, message2, 5));
 	do
 	{
 		while(staticDisplay.animate());
+		while(scrollLeft2.animate());
 		while(scrollLeft1.animate());
 	} while(1);
 }

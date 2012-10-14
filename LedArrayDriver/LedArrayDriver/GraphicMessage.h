@@ -8,11 +8,11 @@ class GraphicMessage : public Message {
 	public:
 	GraphicMessage(uint8_t *message, uint16_t messageLen);
 	~GraphicMessage();
-	void buffer(uint8_t *ptr);
-	uint16_t getLength();
+	virtual void buffer(uint8_t *ptr);
+	virtual uint16_t getLength();
 	void* operator new(size_t size);
 	void operator delete(void*);
-	private:
+	protected:
 	uint8_t *_message;
 	uint16_t _messageLen;
 };
