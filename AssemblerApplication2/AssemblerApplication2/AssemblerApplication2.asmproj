@@ -16,7 +16,7 @@
     <RootNamespace>AssemblerApplication2</RootNamespace>
     <EntryFile>$(MSBuildProjectDirectory)\AssemblerApplication2.asm</EntryFile>
     <ToolchainFlavour>Native</ToolchainFlavour>
-    <AsfVersion>3.1.3</AsfVersion>
+    <AsfVersion>2.11.1</AsfVersion>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <OverrideVtorValue />

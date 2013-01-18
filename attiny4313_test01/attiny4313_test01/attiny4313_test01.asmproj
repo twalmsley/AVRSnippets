@@ -16,7 +16,7 @@
     <RootNamespace>attiny4313_test01</RootNamespace>
     <EntryFile>$(MSBuildProjectDirectory)\attiny4313_test01.asm</EntryFile>
     <ToolchainFlavour>Native</ToolchainFlavour>
-    <AsfVersion>3.1.3</AsfVersion>
+    <AsfVersion>2.11.1</AsfVersion>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <OverrideVtorValue />
