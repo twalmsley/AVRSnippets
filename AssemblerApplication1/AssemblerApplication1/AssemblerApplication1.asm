@@ -48,11 +48,6 @@
 ; [Add all register names here, include info on
 ;  all used registers without specific names]
 ; Format: .DEF rmp = R16
-.DEF rmp = R16 ; Multipurpose register
-
-.DEF ctra = R17 ; Counter low byte
-.DEF ctrb = R18 ; Counter medium byte
-.DEF ctrc = R19 ; Counter high byte
 ;
 ; ============================================
 ;       S R A M   D E F I N I T I O N S
@@ -77,13 +72,8 @@
 ;
 .ORG INT_VECTORS_SIZE
 TogglePinInterrupt:
-		in rmp,PORTB			; Get the current state of Port B
-		ANDI rmp, 0b10000000	; Isolate the LED bit
-		breq SetBit				; If its zero jump to SetBit
-		cbi PORTB, PORTB7		; Otherwise it was set, so clear it (turn off the LED).
-SetBit:
-		sbi PORTB,PORTB7
-		reti					; Return to the main loop
+		sbi PINB, PORTB7
+		reti
 ;
 ; ============================================
 ;     M A I N    P R O G R A M    I N I T
@@ -92,12 +82,8 @@ SetBit:
 RESET:
 		INIT_STACK	;Macro to set up the stack pointer
 ; Init Port B
-        ldi rmp,0b10000000 ; Direction of Port B - arduino board LED is port B pin 7
-        out DDRB,rmp
-; Enable sleep model IDLE
-		ldi rmp,(1<<SE | 1<<SM1) ; enable sleep
-        out MCUCR,rmp
-		sei
+        ; Direction of Port B - arduino board LED is port B pin 7
+		sbi DDRB, PORTB7
 ;
 ; ============================================
 ;         P R O G R A M    L O O P
@@ -105,7 +91,6 @@ RESET:
 ;
 		rcall WDT_Prescaler_Change		;Set delay to about 0.5s
 Loop:
-		sleep
         rjmp loop ; repeat forever
 ;
 ; ============================================
@@ -123,7 +108,7 @@ WDT_Prescaler_Change:
 		sts WDTCSR, r16
 ; -- Got four cycles to set the new values from here -
 ; Set new prescaler(time-out) value = 64K cycles (~0.5 s)
-		ldi r16, (1<<WDE) | (1<<WDP2) | (1<<WDP0)
+		ldi r16, (1<<WDIE) | (1<<WDP2) | (1<<WDP0)
 		sts WDTCSR, r16
 ; -- Finished setting new values, used 3 cycles -
 ; Turn on global interrupt
