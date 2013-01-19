@@ -45,14 +45,16 @@
 ;   R E G I S T E R   D E F I N I T I O N S
 ; ============================================
 ;
-.DEF	tmr1 = r24
-.DEF	tmr2 = r25
-.DEF	tmr3 = r26
 .DEF	gpReg = r16
 .DEF	gpCount = r17
-.DEF	redFlashCount = r28
-.DEF	resetRedDelayCount = r29
-.DEF	numberOfResets = r30
+.DEF	redFlashCount = r18
+.DEF	resetRedDelayCount = r19
+.DEF	numberOfResetsL = r20
+.DEF	numberOfResetsH = r21
+.DEF	digitBits = r22
+.DEF	tmr1 = r24
+.DEF	tmr2 = r25
+.DEF	tmr3 = r23
 ;
 ; ============================================
 ;       S R A M   D E F I N I T I O N S
@@ -68,17 +70,22 @@
 .CSEG
 .ORG $0000
         rjmp RESET ; Reset vector
-.ORG PCIBaddr
-		rjmp EXTInt0; handle pin change interrupt
 .ORG OVF1addr
 		rjmp reset_redcounter
+.ORG PCIDaddr
+		rjmp EXTInt0; handle pin change interrupt
 ;
 ; ============================================
 ;     I N T E R R U P T   S E R V I C E S
 ; ============================================
 .ORG INT_VECTORS_SIZE
 
-;
+; ============================================
+;     STATIC DATA
+; ============================================
+digits:; The 7-seg bits
+.DB 0b00010100, 0b01111110, 0b00110001, 0b00111000, 0b01011010, 0b10011000, 0b10010000, 0b00111110, 0b00010000, 0b00011000
+.DB 0b00000100, 0b01101110, 0b00100001, 0b00101000, 0b01001010, 0b10001000, 0b10000000, 0b00101110, 0b00000000, 0b00001000
 ;
 ; ============================================
 ;     M A I N    P R O G R A M    I N I T
@@ -96,17 +103,28 @@ RESET:
 ;
 ; Set the IO Ports
 ;
-		sbi DDRB, PORTB0
-		cbi DDRB, PORTB1
 		sbi DDRD, PORTD0
-		cbi PORTB, PORTB0
+		cbi DDRD, PORTD1
+		sbi DDRD, PORTD2
+		cbi PORTD, PORTD2
 		cbi PORTD, PORTD0
+		ldi gpReg, 0xFF
+		out DDRB, gpReg
+		ldi gpReg, 0x00
+		out PORTB, gpReg
 ;
 ; Initialise everything
 ;
 		rcall init_ext_interrupt
 		rcall init_16bit_timer
-		rcall begin_prog
+		rcall three_flashes
+
+		ldi redFlashCount, 0
+		ldi numberOfResetsL, 0
+		ldi numberOfResetsH, 0
+
+		rcall show_reset_count
+
 		sei
 ;
 ; ============================================
@@ -137,38 +155,36 @@ reset_redcounter:
 		ldi redFlashCount, 0
 		ldi resetRedDelayCount, 0
 skip_reset_red:
-		rcall begin_prog
+		rcall three_flashes
 		reti
 ;
 init_ext_interrupt:
 ;
 ; Enable PCI for Pin 13 (port B1)
 ;
-		ldi gpReg, 1<<PCIE
+		ldi gpReg, 1<<4
 		out GIMSK, gpReg
-		ldi gpReg, 1<<PCINT1
-		out PCMSK, gpReg
+		ldi gpReg, 1<<PCINT12
+		out PCMSK2, gpReg
 		ret
 ;---------------------------------------------
-begin_prog:
-		ldi redFlashCount, 0
+three_flashes:
 		ldi gpCount, 6
-		ldi numberOfResets, 0
-begin_prog_loop:
+three_flashes_loop:
 		ldi gpReg, 128; delay
 		rcall delay_ms
-		sbi PINB, PORTB0
+		sbi PIND, PORTD2
 		dec gpCount
-		breq begin_prog_done
-        rjmp begin_prog_loop
-begin_prog_done:
+		breq three_flashes_done
+        rjmp three_flashes_loop
+three_flashes_done:
 		ret
 ;---------------------------------------------
 EXTInt0:
 		ldi gpReg, 0x01
 		inc redFlashCount
-		cpi redFlashCount, 240; should be 240 for about 4 minutes
-		brge int_done
+		cpi redFlashCount, 20; should be 240 for about 4 minutes
+		brlo int_done
 		;
 		; Toggle PORTD0 to reset the boiler
 		;
@@ -177,7 +193,8 @@ EXTInt0:
 		rcall delay_ms
 		sbi PIND, PORTD0
 		ldi redFlashCount, 0x00
-		inc numberOfResets
+		inc numberOfResetsL
+		rcall show_reset_count
 int_done:
 		reti
 ;---------------------------------------------
@@ -194,6 +211,22 @@ delay_msLoop:
 		brne delay_msLoop
 		dec tmr3
 		brne delay_next
+		ret
+;
+; Display the number of resets on a 2-digit LED display
+; (can only show 0 to 19)
+;
+show_reset_count:
+		cpi numberOfResetsL, 20
+		brne ok
+		ldi numberOfResetsL, 0
+ok:
+		ldi zl, low(digits<<1)
+		ldi zh, high(digits<<1)
+		add zl, numberOfResetsL
+		adc zh, numberOfResetsH
+		lpm digitBits, z
+		out PORTB, digitBits
 		ret
 ;
 ; End of source code
