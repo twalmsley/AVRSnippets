@@ -19,6 +19,7 @@
 ;
 .NOLIST ; Don't list the following in the list file
 .INCLUDE "tn4313def.inc" ; Import of the file
+.INCLUDE "macros.inc"
 .LIST ; Switch list on again
 ;
 ; ============================================
@@ -35,6 +36,7 @@
 .EQU	BACKWARD = 0x05
 .EQU	LEFT = 0x09
 .EQU	RIGHT = 0x06
+.EQU	STOP = 0x00
 ;
 ; ============================================
 ;  F I X + D E R I V E D   C O N S T A N T S
@@ -52,6 +54,7 @@
 .DEF	mainLoop = r17
 .def	switches = r18
 .def	direction = r19
+.def	mask = r20
 .DEF	tmr1 = r24
 .DEF	tmr2 = r25
 .DEF	tmr3 = r23
@@ -61,25 +64,40 @@
 ; ============================================
 ;
 .MACRO	INC_DRIVE_COUNT
-		lds gpReg, DRIVE_COUNT_LOC_LO
+		lds gpReg, DRIVE_COUNT_LOC_BYTE0
 		inc gpReg
-		sts DRIVE_COUNT_LOC_LO, gpReg
+		sts DRIVE_COUNT_LOC_BYTE0, gpReg
+		cpi gpReg, 0x00
 		brne skip_overflow
-		lds gpReg, DRIVE_COUNT_LOC_HI
+		lds gpReg, DRIVE_COUNT_LOC_BYTE1
 		inc gpReg
-		sts DRIVE_COUNT_LOC_HI, gpReg
+		sts DRIVE_COUNT_LOC_BYTE1, gpReg
+		cpi gpReg, 0x00
+		brne skip_overflow
+		lds gpReg, DRIVE_COUNT_LOC_BYTE2
+		inc gpReg
+		sts DRIVE_COUNT_LOC_BYTE2, gpReg
+		cpi gpReg, 0x00
+		brne skip_overflow
+		lds gpReg, DRIVE_COUNT_LOC_BYTE3
+		inc gpReg
+		sts DRIVE_COUNT_LOC_BYTE3, gpReg
+		cpi gpReg, 0x00
+		brne skip_overflow
 skip_overflow:
 .ENDMACRO
 
 .MACRO	RESET_DRIVE_COUNT
 		ldi gpReg, 0x00
-		sts DRIVE_COUNT_LOC_LO, gpReg
-		sts DRIVE_COUNT_LOC_HI, gpReg
+		sts DRIVE_COUNT_LOC_BYTE0, gpReg
+		sts DRIVE_COUNT_LOC_BYTE1, gpReg
+		sts DRIVE_COUNT_LOC_BYTE2, gpReg
+		sts DRIVE_COUNT_LOC_BYTE3, gpReg
 .ENDMACRO
 
 .MACRO	CHECK_DRIVE_COUNT
-		lds gpReg, DRIVE_COUNT_LOC_HI
-		cpi gpReg, 0x60
+		lds gpReg, DRIVE_COUNT_LOC_BYTE2
+		cpi gpReg, 0x16
 .ENDMACRO
 
 .MACRO ENABLE_PCI
@@ -97,6 +115,66 @@ skip_overflow:
 		out SPL, R16
 		out SPH, R17
 .ENDMACRO
+
+.MACRO INIT_TIMER
+		ldi gpReg, 0
+		out TCCR1A, gpReg
+		out TCCR1C, gpReg
+		ldi gpReg, (1<<CS01)
+		out TCCR1B, gpReg
+
+		ldi gpReg, (1<<TOIE1); enable the timer overflow interrupt
+		out TIMSK, gpReg
+.ENDMACRO
+.MACRO INIT_8BIT_TIMER
+		ldi gpReg, 0
+		out TCCR0A, gpReg
+		ldi gpReg, (1<<CS01)
+		out TCCR0B, gpReg
+
+		ldi gpReg, (1<<TOIE0); enable the timer overflow interrupt
+		out TIMSK, gpReg
+.ENDMACRO
+.MACRO  SET_FORWARD_DIRECTION
+; Set the direction to forward and store it in SRAM
+;
+		ldi gpReg, FORWARD
+		sts CUR_DIR_LOC, gpReg
+.ENDMACRO
+.MACRO  SET_STOP
+; Set the direction to forward and store it in SRAM
+;
+		ldi gpReg, STOP
+		sts CUR_DIR_LOC, gpReg
+.ENDMACRO
+.MACRO  SET_LEFT_RECOVER
+;
+; Set the recover direction to LEFT and store in SRAM
+;
+		ldi gpReg, LEFT
+		sts RECOVER_DIR_LOC, gpReg
+.ENDMACRO
+.MACRO  SET_UP_IO_PORTS
+;
+; Set the IO Ports
+;
+		ldi gpReg, 0x1F
+		out DDRB, gpReg		;PortB bits 0-3 control the motors, 4 is the led
+
+		ldi gpReg, 0x00
+		out PORTB, gpReg
+		cbi PORTB, 4
+
+		ldi gpReg, 0x03
+		out DDRA, gpReg		;Port A bits 0 and 1 are for the bumper switches
+.ENDMACRO
+.MACRO GO
+;
+; Start in the default direction
+;
+		lds direction, CUR_DIR_LOC
+		rcall startmoving
+.ENDMACRO
 ; ============================================
 ;       S R A M   D E F I N I T I O N S
 ; ============================================
@@ -104,9 +182,13 @@ skip_overflow:
 .DSEG
 CUR_DIR_LOC:
 			.DB 0x00
-DRIVE_COUNT_LOC_LO:
+DRIVE_COUNT_LOC_BYTE0:
 			.DB 0x00
-DRIVE_COUNT_LOC_HI:
+DRIVE_COUNT_LOC_BYTE1:
+			.DB 0x00
+DRIVE_COUNT_LOC_BYTE2:
+			.DB 0x00
+DRIVE_COUNT_LOC_BYTE3:
 			.DB 0x00
 RECOVER_DIR_LOC:
 			.DB 0x00
@@ -122,6 +204,8 @@ RECOVER_DIR_LOC:
         rjmp RESET ; Reset vector
 .ORG PCIAaddr
 		rjmp EXTInt0; handle pin change interrupt
+.ORG OVF0addr
+		rjmp PWMInterrupt; when the 8-bit timer overflows
 ;
 ; ============================================
 ;     I N T E R R U P T   S E R V I C E S
@@ -137,70 +221,52 @@ RECOVER_DIR_LOC:
 ; ============================================
 ;
 RESET:
+		ldi mask, 0xff
 		INIT_STACK
-;
-; Set the IO Ports
-;
-		ldi gpReg, 0x1F
-		out DDRB, gpReg		;PortB bits 0-3 control the motors, 4 is the led
-
-		ldi gpReg, 0x00
-		out PORTB, gpReg
-		cbi PORTB, 4
-
-		ldi gpReg, 0x03
-		out DDRA, gpReg		;Port A bits 0 and 1 are for the bumper switches
-
+		SET_UP_IO_PORTS
 		ENABLE_PCI
-; Set the direction to forward and store it in SRAM
-;
-		ldi gpReg, FORWARD
-		sts CUR_DIR_LOC, gpReg
-;
-; Set the recover direction to LEFT and store in SRAM
-;
-		ldi gpReg, LEFT
-		sts RECOVER_DIR_LOC, gpReg
+		SET_FORWARD_DIRECTION
+		SET_LEFT_RECOVER
+		INIT_8BIT_TIMER
 ;
 ; ============================================
 ;         P R O G R A M    L O O P
 ; ============================================
 ;
 loop:
-;
-; Start in the default direction
-;
-		lds direction, CUR_DIR_LOC
-		rcall startmoving
-;
-; Increment the drive count
-;
-		INC_DRIVE_COUNT
-		CHECK_DRIVE_COUNT
-		brne loop
-;
-; After a number of iterations reset the count and switch the recovery direction
-;
-		RESET_DRIVE_COUNT
-
-        rjmp loop
+		GO					;Start moving
+		INC_DRIVE_COUNT		;Increment a counter so we don't run for too long
+		CHECK_DRIVE_COUNT	;Check the counter
+		brne loop			;Loop if not timed-out
+		SET_STOP			;Set the direction to STOP
+		GO					;Err, actually stop because the current direction was just set to stop
+		RESET_DRIVE_COUNT	;Not really necessary as it has no effect
+halt:
+        rjmp halt			;Busywait
 ;
 ; ============================================
 ;         Subroutines
 ; ============================================
+;
+; Stop the motors
+;
 stopmoving:
 		in gpReg, PINB
 		andi gpReg, 0xF0
 		out PORTB, gpReg
 		ret
+;
+; Enable the motors in 'direction'
+;
 startmoving:
 		in gpReg, PINB
 		andi gpReg, 0xF0
 		or gpReg, direction
+		and gpReg, mask
 		out PORTB, gpReg
 		ret
 ;---------------------------------------------
-; Delay r16
+; Delay r16 - simple timer
 ;---------------------------------------------
 delay_ms:
 		mov tmr3, gpReg
@@ -215,11 +281,13 @@ delay_msLoop:
 		brne delay_next
 		ret
 ;---------------------------------------------
+; One of the bumpers was hit
 ;---------------------------------------------
 EXTInt0:
 		cli
 		;
-		; Check that one of the buffers has been hit
+		; Check that one of the buffers has been hit and do a quick reverse and turn
+		; before continuing
 		;
 		in gpReg,PORTD
 		andi gpReg, 0x03
@@ -237,6 +305,15 @@ recover:
 		rcall stopmoving
 int_done:
 		sei
+		reti
+;
+; PWM Interrupt event
+; Mask alternates between 0xFF and 0xF0 to do a crude 50% pwm on the drive motors.
+; except during the recover operation.
+;
+PWMInterrupt:
+		ldi r21, 0x0F
+		eor mask, r21
 		reti
 ;
 ; End of source code
