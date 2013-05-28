@@ -218,6 +218,13 @@ delay_msLoop:
 ;---------------------------------------------
 EXTInt0:
 		cli
+		;
+		; Check that one of the buffers has been hit
+		;
+		in gpReg,PORTD
+		andi gpReg, 0x03
+		breq recover
+		reti
 recover:
 		ldi direction, BACKWARD
 		rcall startmoving
