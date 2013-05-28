@@ -40,6 +40,9 @@
     <Compile Include="4313_Cybot.asm">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="tmp.asm">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Assembler.targets" />
 </Project>
