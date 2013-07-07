@@ -1,15 +1,5 @@
 /*
- * ATTiny4313_BoilerWatchdog.asm
- *
- * This program counts pin toggles on PORTB1 and sends a pulse on
- * PORTD0 if the count reaches 240.
- *
- * TIMER1 will reset this count every 6 minutes, so if the boiler
- * is in lockout mode, PORTD0 can be used to reset it via a relay.
- * Otherwise, if not in reset mode, the timer will reset the count
- * to prevent spurious boiler resets.
- *
- *  Created: 17/08/2012 08:48:43
+ * temporary copy for later deletion
  *   Author: tony
  */
 ;
@@ -19,6 +9,7 @@
 ;
 .NOLIST ; Don't list the following in the list file
 .INCLUDE "tn4313def.inc" ; Import of the file
+.INCLUDE "macros.inc"
 .LIST ; Switch list on again
 ;
 ; ============================================
@@ -35,6 +26,7 @@
 .EQU	BACKWARD = 0x05
 .EQU	LEFT = 0x09
 .EQU	RIGHT = 0x06
+.EQU	STOP = 0x00
 ;
 ; ============================================
 ;  F I X + D E R I V E D   C O N S T A N T S
@@ -52,51 +44,10 @@
 .DEF	mainLoop = r17
 .def	switches = r18
 .def	direction = r19
+.def	mask = r20
 .DEF	tmr1 = r24
 .DEF	tmr2 = r25
 .DEF	tmr3 = r23
-;
-; ============================================
-;     MACROS
-; ============================================
-;
-.MACRO	INC_DRIVE_COUNT
-		lds gpReg, DRIVE_COUNT_LOC_LO
-		inc gpReg
-		sts DRIVE_COUNT_LOC_LO, gpReg
-		brne skip_overflow
-		lds gpReg, DRIVE_COUNT_LOC_HI
-		inc gpReg
-		sts DRIVE_COUNT_LOC_HI, gpReg
-skip_overflow:
-.ENDMACRO
-
-.MACRO	RESET_DRIVE_COUNT
-		ldi gpReg, 0x00
-		sts DRIVE_COUNT_LOC_LO, gpReg
-		sts DRIVE_COUNT_LOC_HI, gpReg
-.ENDMACRO
-
-.MACRO	CHECK_DRIVE_COUNT
-		lds gpReg, DRIVE_COUNT_LOC_HI
-		cpi gpReg, 0x60
-.ENDMACRO
-
-.MACRO ENABLE_PCI
-		ldi gpReg, 1<<3		;i.e. PCIE1
-		out GIMSK, gpReg
-		ldi gpReg, 1<<PCINT9 | 1<<PCINT8
-		out PCMSK1, gpReg
-		sei					; enable interrupts
-.ENDMACRO
-
-.MACRO INIT_STACK
-		cli
-		ldi r16, low(RAMEND)
-		ldi r17, high(RAMEND)
-		out SPL, R16
-		out SPH, R17
-.ENDMACRO
 ; ============================================
 ;       S R A M   D E F I N I T I O N S
 ; ============================================
@@ -104,9 +55,13 @@ skip_overflow:
 .DSEG
 CUR_DIR_LOC:
 			.DB 0x00
-DRIVE_COUNT_LOC_LO:
+DRIVE_COUNT_LOC_BYTE0:
 			.DB 0x00
-DRIVE_COUNT_LOC_HI:
+DRIVE_COUNT_LOC_BYTE1:
+			.DB 0x00
+DRIVE_COUNT_LOC_BYTE2:
+			.DB 0x00
+DRIVE_COUNT_LOC_BYTE3:
 			.DB 0x00
 RECOVER_DIR_LOC:
 			.DB 0x00
@@ -122,6 +77,8 @@ RECOVER_DIR_LOC:
         rjmp RESET ; Reset vector
 .ORG PCIAaddr
 		rjmp EXTInt0; handle pin change interrupt
+.ORG OVF0addr
+		rjmp PWMInterrupt; when the 8-bit timer overflows
 ;
 ; ============================================
 ;     I N T E R R U P T   S E R V I C E S
@@ -138,98 +95,98 @@ RECOVER_DIR_LOC:
 ;
 RESET:
 		INIT_STACK
-;
-; Set the IO Ports
-;
-		ldi gpReg, 0x1F
-		out DDRB, gpReg		;PortB bits 0-3 control the motors, 4 is the led
-
-		ldi gpReg, 0x00
-		out PORTB, gpReg
-		cbi PORTB, 4
-
-		ldi gpReg, 0x03
-		out DDRA, gpReg		;Port A bits 0 and 1 are for the bumper switches
-
+		SET_UP_IO_PORTS
 		ENABLE_PCI
-; Set the direction to forward and store it in SRAM
-;
-		ldi gpReg, FORWARD
-		sts CUR_DIR_LOC, gpReg
-;
-; Set the recover direction to LEFT and store in SRAM
-;
-		ldi gpReg, LEFT
-		sts RECOVER_DIR_LOC, gpReg
+		SET_FORWARD_DIRECTION
+		SET_LEFT_RECOVER
+		INIT_8BIT_TIMER
 ;
 ; ============================================
 ;         P R O G R A M    L O O P
 ; ============================================
 ;
+		ldi mask, 0xff
 loop:
-;
-; Start in the default direction
-;
-		lds direction, CUR_DIR_LOC
-		rcall startmoving
-;
-; Increment the drive count
-;
-		INC_DRIVE_COUNT
-		CHECK_DRIVE_COUNT
-		brne loop
-;
-; After a number of iterations reset the count and switch the recovery direction
-;
-		RESET_DRIVE_COUNT
-
-        rjmp loop
+		GO					;Start moving
+		INC_DRIVE_COUNT		;Increment a counter so we don't run for too long
+		CHECK_DRIVE_COUNT	;Check the counter
+		brne loop			;Loop if not timed-out
+		SET_STOP			;Set the direction to STOP
+		GO					;Err, actually stop because the current direction was just set to stop
+		RESET_DRIVE_COUNT	;Not really necessary as it has no effect
+halt:
+        rjmp halt			;Busywait
 ;
 ; ============================================
 ;         Subroutines
 ; ============================================
+;
+; Stop the motors
+;
 stopmoving:
 		in gpReg, PINB
 		andi gpReg, 0xF0
 		out PORTB, gpReg
 		ret
+;
+; Enable the motors in 'direction'
+;
 startmoving:
 		in gpReg, PINB
 		andi gpReg, 0xF0
 		or gpReg, direction
+		and gpReg, mask		;This provides crude pwm
 		out PORTB, gpReg
 		ret
 ;---------------------------------------------
-; Delay r16
+; Delay r16 - simple timer
 ;---------------------------------------------
 delay_ms:
-		mov tmr3, gpReg
+		mov tmr3, gpReg			; 1 tick + 3 for the rcall
 delay_next:
-		ldi tmr1, 0x00
-		ldi tmr2, 0x20
+		ldi tmr1, 0xD0
+		ldi tmr2, 0x07
 
 delay_msLoop:
-		sbiw tmr1:tmr2, 0x01
-		brne delay_msLoop
-		dec tmr3
-		brne delay_next
-		ret
+		sbiw tmr1:tmr2, 0x01	; 2 ticks * 2000
+		brne delay_msLoop		; 1 + 1999 ticks
+		dec tmr3				; 1 tick
+		brne delay_next			; 1 + 2*gpReg ticks
+		ret						; 4 ticks
 ;---------------------------------------------
+; One of the bumpers was hit
 ;---------------------------------------------
 EXTInt0:
 		cli
+		;
+		; Check that one of the buffers has been hit and do a quick reverse and turn
+		; before continuing
+		;
+		in gpReg,PORTD
+		andi gpReg, 0x03
+		breq recover
+		rjmp int_done
 recover:
 		ldi direction, BACKWARD
 		rcall startmoving
-		ldi gpReg, 0x60
+		ldi gpReg, 0250
 		rcall delay_ms
 		lds direction, RECOVER_DIR_LOC
 		rcall startmoving
-		ldi gpReg, 0x30
+		ldi gpReg, 250
 		rcall delay_ms
 		rcall stopmoving
 int_done:
 		sei
+		reti
+;
+; PWM Interrupt event
+; Mask alternates between 0xFF and 0xF0 to do a crude 50% pwm on the drive motors.
+; except during the recover operation.
+;
+PWMInterrupt:
+		ldi r21, 0x0F
+		eor mask, r21
 		reti
 ;
 ; End of source code

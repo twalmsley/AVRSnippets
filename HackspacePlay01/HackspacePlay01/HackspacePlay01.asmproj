@@ -4,23 +4,19 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>6.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRAssembler</ToolchainName>
-    <ProjectGuid>{f84a89b1-a361-4dc3-8dce-549675bb6cdf}</ProjectGuid>
+    <ProjectGuid>{54c7555e-9299-474f-a6a7-f0819222a238}</ProjectGuid>
     <avrdeviceseries>none</avrdeviceseries>
     <avrdevice>ATtiny4313</avrdevice>
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.obj</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
     <Language>ASSEMBLY</Language>
-    <AssemblyName>4313_Cybot</AssemblyName>
-    <Name>4313_Cybot</Name>
-    <RootNamespace>4313_Cybot</RootNamespace>
-    <EntryFile>$(MSBuildProjectDirectory)\4313_Cybot.asm</EntryFile>
+    <AssemblyName>HackspacePlay01</AssemblyName>
+    <Name>HackspacePlay01</Name>
+    <RootNamespace>HackspacePlay01</RootNamespace>
+    <EntryFile>$(MSBuildProjectDirectory)\HackspacePlay01.asm</EntryFile>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <AsfVersion>3.5.1</AsfVersion>
-    <KeepTimersRunning>true</KeepTimersRunning>
-    <OverrideVtor>false</OverrideVtor>
-    <OverrideVtorValue />
-    <eraseonlaunchrule>0</eraseonlaunchrule>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
@@ -37,10 +33,7 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="4313_Cybot.asm">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="tmp.asm">
+    <Compile Include="HackspacePlay01.asm">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

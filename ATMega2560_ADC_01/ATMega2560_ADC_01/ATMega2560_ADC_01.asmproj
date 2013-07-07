@@ -4,17 +4,17 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>6.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRAssembler</ToolchainName>
-    <ProjectGuid>{f84a89b1-a361-4dc3-8dce-549675bb6cdf}</ProjectGuid>
+    <ProjectGuid>{de3e69e0-fe50-4685-8b0f-c09a1331cd7b}</ProjectGuid>
     <avrdeviceseries>none</avrdeviceseries>
-    <avrdevice>ATtiny4313</avrdevice>
+    <avrdevice>ATmega2560</avrdevice>
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.obj</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
     <Language>ASSEMBLY</Language>
-    <AssemblyName>4313_Cybot</AssemblyName>
-    <Name>4313_Cybot</Name>
-    <RootNamespace>4313_Cybot</RootNamespace>
-    <EntryFile>$(MSBuildProjectDirectory)\4313_Cybot.asm</EntryFile>
+    <AssemblyName>ATMega2560_ADC_01</AssemblyName>
+    <Name>ATMega2560_ADC_01</Name>
+    <RootNamespace>ATMega2560_ADC_01</RootNamespace>
+    <EntryFile>$(MSBuildProjectDirectory)\ATMega2560_ADC_01.asm</EntryFile>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <AsfVersion>3.5.1</AsfVersion>
     <KeepTimersRunning>true</KeepTimersRunning>
@@ -37,10 +37,7 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="4313_Cybot.asm">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="tmp.asm">
+    <Compile Include="ATMega2560_ADC_01.asm">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
