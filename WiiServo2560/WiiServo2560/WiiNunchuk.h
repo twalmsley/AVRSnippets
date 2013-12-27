@@ -95,14 +95,14 @@ class WiiNunchuk {
 			The z button
 		*/
 		byte z() {
-			return (data[5]&0x03) == 0 || (data[5]&0x03) == 2;
+			return (~data[5]) & 0x01;
 		}
 
 		/*
 			The c button
 		*/
 		byte c() {
-			return (data[5]&0x03) == 1 || (data[5]&0x03) == 2;
+			return (~data[5]>>1) & 0x01;
 		}
 
     private:

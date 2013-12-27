@@ -19,27 +19,26 @@
 #define ICR1_MAX 39999
 #define SERVO_9G_MIN 1200
 #define SERVO_9G_MAX 4600
+#define SERVO_9G_RANGE (SERVO_9G_MAX - SERVO_9G_MIN)
+
+#define ACC_MIN 70
+#define ACC_MAX 180
+#define ACC_RANGE (ACC_MAX-ACC_MIN)
+
+#define JOY_MIN 70
+#define JOY_MAX 180
+#define JOY_RANGE (JOY_MAX-JOY_MIN)
+
+#define ACC_M_VAL ((float)SERVO_9G_RANGE/(float)ACC_RANGE)
+#define ACC_C_VAL ((float)SERVO_9G_MIN-ACC_MIN*ACC_M_VAL)
+
+#define JOY_M_VAL ((float)SERVO_9G_RANGE/(float)JOY_RANGE)
+#define JOY_C_VAL ((float)SERVO_9G_MIN-JOY_MIN*JOY_M_VAL)
+
 #define REPEAT 1
 #define STEP_DELAY 500
 
 #define TWI_CMD_MASTER_READ  0x20
-
-void showTWIStatus(uint8_t statusCount)
-{
-		//
-		// Display the status
-		//
-		char hex[3] = {' ',' ',0x00};
-		setPosition(0,0);
-		display("Count:              ");
-		setPosition(0,8);
-		to_hex(statusCount, hex);
-		display(hex);
-		display(" ");
-		to_hex(TW_STATUS, hex);
-		display(hex);
-		_delay_ms(500);
-}
 
 void showHex(uint8_t value)
 {
@@ -51,6 +50,43 @@ void showHex(uint8_t value)
 	display(hex);
 }
 
+uint16_t accToServoRange(uint8_t val) {
+	float fval = (float)val;
+	uint16_t result = fval*ACC_M_VAL+ACC_C_VAL;
+	return result;
+}
+
+uint16_t joyToServoRange(uint8_t val) {
+	float fval = (float)val;
+	uint16_t result = fval*JOY_M_VAL+JOY_C_VAL;
+	return result;
+}
+
+void showNunchukData( WiiNunchuk &wiiClassy )
+{
+
+		displayAt(0,0,"x: ");
+		showHex(wiiClassy.x());
+
+		displayAt(1,0,"y: ");
+		showHex(wiiClassy.y());
+
+		displayAt(0,6,"Xa:");
+		showHex(wiiClassy.xacc());
+
+		displayAt(0,11,",Ya:");
+		showHex(wiiClassy.yacc());
+
+		displayAt(1,6,"Za:");
+		showHex(wiiClassy.zacc());
+
+		setPosition(1,12);
+		showHex(wiiClassy.z());
+
+		setPosition(1,15);
+		showHex(wiiClassy.c());
+}
+
 int main(void)
 {
 	uint8_t statusCount = 0;
@@ -59,9 +95,8 @@ int main(void)
 	//
 	init_lcd();
 
-#ifdef SERVOS
-	setPosition(0,0);
-	display("Moving Servos...");
+	// Set up PE4 + PE5 (arduino pins 2 and 3) to show the wii nunchuk z and c buttons
+	DDRE |= _BV(PORTE4) | _BV(PORTE5);
 	//
 	//Set the output ports
 	//
@@ -84,6 +119,7 @@ int main(void)
 	TCCR3C |= 0;
 	ICR3 = ICR1_MAX;//Sets the cycle to 20ms
 
+#ifdef SERVOS
 //
 // Send two servos from one end to the other every 0.5s, REPEAT times, in anti-phase.
 //
@@ -111,28 +147,27 @@ int main(void)
 
     while(1)
     {
-		_delay_ms(100);
 		wiiClassy.update();
 
-		displayAt(0,0,"x: ");
-		showHex(wiiClassy.x());
+		showNunchukData(wiiClassy);
 
-		displayAt(0,6,"Xa:");
-		showHex(wiiClassy.xacc());
 
-		displayAt(0,11,",Ya:");
-		showHex(wiiClassy.yacc());
+		OCR1A = ICR1_MAX - accToServoRange(wiiClassy.xacc());
+		OCR3A = ICR3 - accToServoRange(wiiClassy.yacc());
 
-		displayAt(1,6,"Za:");
-		showHex(wiiClassy.zacc());
-
-		setPosition(1,12);
-		showHex(wiiClassy.z());
-
-		setPosition(1,15);
-		showHex(wiiClassy.c());
-
-		displayAt(1,0,"y: ");
-		showHex(wiiClassy.y());
+		OCR1B = ICR1_MAX - joyToServoRange(wiiClassy.x());
+		OCR1C = ICR1 - joyToServoRange(wiiClassy.y());
+		
+		if(wiiClassy.z()) {
+			PORTE |= _BV(PORTE4);
+		} else {
+			PORTE &= ~_BV(PORTE4);
+		}
+		
+		if(wiiClassy.c()) {
+			PORTE |= _BV(PORTE5);
+		} else {
+			PORTE &= ~_BV(PORTE5);
+		}
     }
 }
