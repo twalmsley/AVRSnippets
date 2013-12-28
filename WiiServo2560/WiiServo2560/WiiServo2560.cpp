@@ -14,6 +14,56 @@
 #include "LCD_2560.h"
 #include "WiiNunchuk.h"
 
+/*
+ * (DO = Digital Out)
+ *
+ *	Arduino Pin Id		AVR Pin Id		Used As		Destination
+ *	--------------		----------		-------		-----------
+ *	2					PE4				DO			LED
+ *	3					PE5				DO			LED
+ *	5					PE3				PWM			Servo1
+ *	11					PB5				PWM			Servo2
+ *	12					PB6				PWM			Servo3
+ *	13					PB7				PWM			Servo4
+ *	20					PD1				SDA			Nunchuk green
+ *	21					PD0				SCL			Nunchuk yellow
+ *	31					PC6				DO			LCD 4	Register Select (RS). RS=0: Command, RS=1: Data
+ *	32					PC5				DO			LCD 5	Read/Write (R/W). R/W=0: Write, R/W=1: Read
+ *	33					PC4				DO			LCD 6	Clock (Enable). Falling edge triggered
+ *	34					PC3				DO			LCD 14	Bit 4
+ *	35					PC2				DO			LCD 13	Bit 5
+ *	36					PC1				DO			LCD 12	Bit 6
+ *	37					PC0				DO			LCD 11	Bit 7
+ *
+ *	Nunchuk Pinout
+ *	--------------
+ *	white		GND
+ *	red			3.3V (possibly ok at 5V)
+ *	green		SDA	+ pullup resistor to red
+ *	yellow		CLK	+ pullup resistor to red
+ *
+ *	LCD Pinout (lifted from wikipedia)
+ *	----------------------------------
+ *
+ *	1 Ground
+ *	2 VCC (+3.3 to +5V)
+ *	3 Contrast adjustment (VO) -						*******Wire to VCC for maximum contrast  *********
+ *	4 Register Select (RS). RS=0: Command, RS=1: Data
+ *	5 Read/Write (R/W). R/W=0: Write, R/W=1: Read
+ *	6 Clock (Enable). Falling edge triggered
+ *	7 Bit 0 (Not used in 4-bit operation)
+ *	8 Bit 1 (Not used in 4-bit operation)
+ *	9 Bit 2 (Not used in 4-bit operation)
+ *	10 Bit 3 (Not used in 4-bit operation)
+ *	11 Bit 4
+ *	12 Bit 5
+ *	13 Bit 6
+ *	14 Bit 7
+ *	15 Backlight Anode (+)
+ *	16 Backlight Cathode (-)
+ *
+*/
+
 //#define SERVOS
 
 #define ICR1_MAX 39999
@@ -157,13 +207,13 @@ int main(void)
 
 		OCR1B = ICR1_MAX - joyToServoRange(wiiClassy.x());
 		OCR1C = ICR1 - joyToServoRange(wiiClassy.y());
-		
+
 		if(wiiClassy.z()) {
 			PORTE |= _BV(PORTE4);
 		} else {
 			PORTE &= ~_BV(PORTE4);
 		}
-		
+
 		if(wiiClassy.c()) {
 			PORTE |= _BV(PORTE5);
 		} else {
