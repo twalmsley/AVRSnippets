@@ -17,8 +17,8 @@
 //#define SERVOS
 
 #define ICR1_MAX 39999
-#define SERVO_9G_MIN 1200
-#define SERVO_9G_MAX 4600
+#define SERVO_9G_MIN 1172
+#define SERVO_9G_MAX 5063
 #define SERVO_9G_RANGE (SERVO_9G_MAX - SERVO_9G_MIN)
 
 #define ACC_MIN 70
@@ -152,8 +152,8 @@ int main(void)
 		showNunchukData(wiiClassy);
 
 
-		OCR1A = ICR1_MAX - accToServoRange(wiiClassy.xacc());
-		OCR3A = ICR3 - accToServoRange(wiiClassy.yacc());
+		OCR1A = ICR1_MAX - accToServoRange(wiiClassy.xacc() & 0xFC);
+		OCR3A = ICR3 - accToServoRange(wiiClassy.yacc() & 0xFC);
 
 		OCR1B = ICR1_MAX - joyToServoRange(wiiClassy.x());
 		OCR1C = ICR1 - joyToServoRange(wiiClassy.y());
