@@ -7,10 +7,10 @@
  * Sends messages to an LCD based on data received on the usart
  * Can respond to commands ledon and ledoff to control portb7 LED
  *
- */ 
+ */
 ;
 ; ============================================
-;   H A R D W A R E   I N F O R M A T I O N   
+;   H A R D W A R E   I N F O R M A T I O N
 ; ============================================
 ;
 .NOLIST ; Don't list the following in the list file
@@ -18,18 +18,18 @@
 .LIST ; Switch list on again
 ;
 ; ============================================
-;      P O R T S   A N D   P I N S 
+;      P O R T S   A N D   P I N S
 ; ============================================
 ;
 ;
 ; ============================================
-;    C O N S T A N T S   T O   C H A N G E 
+;    C O N S T A N T S   T O   C H A N G E
 ; ============================================
 ;
 .EQU fq = 8000000 ; XTal frequency definition
 ;
 ; ============================================
-;  F I X + D E R I V E D   C O N S T A N T S 
+;  F I X + D E R I V E D   C O N S T A N T S
 ; ============================================
 ;
 .EQU bufferSize = 80 ; size of LCD memory
@@ -187,6 +187,7 @@ RESET:
 ;         P R O G R A M    L O O P
 ; ============================================
 ;
+		rjmp skip_serial_setup
 ; Init USART to 9600 baud at 8MHz with U2Xn=0
 		ldi r16, 51
 		ldi r17, 0
@@ -194,10 +195,11 @@ RESET:
 		rcall init_rx_buffer
 		ldi r16, 0xFF		; Wait after startup
 		rcall delay_ms
+skip_serial_setup:
 		rcall LCD_Init
 		sei
 ; Init Port B
-        sbi DDRB,PORTB7; Direction of Port B - arduino board LED is port B pin 7 
+        sbi DDRB,PORTB7; Direction of Port B - arduino board LED is port B pin 7
 
 		ldi r16, 0; First character
 		rcall	LCD_SetAddressDD
@@ -213,6 +215,7 @@ RESET:
 		rcall LCD_WriteString
 		ldi r20,0
 loop:
+
 		ldi r16, 0x40; First character, 2nd row
 		rcall	LCD_SetAddressDD
 		mov r16, r20
@@ -336,4 +339,4 @@ returnFromCompare:
 
 ;
 ; End of source code
-;		
+;
