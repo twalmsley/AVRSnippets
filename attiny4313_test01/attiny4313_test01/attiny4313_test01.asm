@@ -18,7 +18,7 @@
 ; ============================================
 ;
 .EQU fq = 8000000 ; XTal frequency definition
-.equ wait = 8;milliseconds
+.equ wait = 2;milliseconds
 ;
 ; ============================================
 ;    C O N S T A N T S   T O   C H A N G E 
@@ -77,29 +77,34 @@ RESET:
 		out SPL, R16
 		out SPH, R17
 
-		sbi DDRB, PORTB0
-		sbi DDRB, PORTB1
-		sbi DDRB, PORTB2
-		sbi DDRB, PORTB3
+;		sbi DDRB, PORTB0
+;		sbi DDRB, PORTB1
+;		sbi DDRB, PORTB2
+;		sbi DDRB, PORTB3
 ;
 ; ============================================
 ;         P R O G R A M    L O O P
 ; ============================================
 		rcall stopMotor
-		ldi r16, wait; delay
-		rcall delay_ms
-		rcall anticlockwise
-		ldi r16, 0x64
+		ldi r16, 0x80
 		mov r0, r16
 loop:
+		call one
 		ldi r16, wait; delay
 		rcall delay_ms
-		sbi PINB, PORTB0
-		sbi PINB, PORTB1
+
+		call two
 		ldi r16, wait; delay
 		rcall delay_ms
-		sbi PINB, PORTB2
-		sbi PINB, PORTB3
+
+		call four
+		ldi r16, wait; delay
+		rcall delay_ms
+
+		call eight
+		ldi r16, wait; delay
+		rcall delay_ms
+
 		dec r0
 		brne loop
 		rcall stopMotor
@@ -126,6 +131,54 @@ anticlockwise:
 		cbi PORTB, PORTB0
 		sbi PORTB, PORTB1
 		cbi PORTB, PORTB2
+		sbi PORTB, PORTB3
+		ret
+one:
+		sbi PORTB, PORTB0
+		cbi PORTB, PORTB1
+		cbi PORTB, PORTB2
+		cbi PORTB, PORTB3
+		ret
+two:
+		cbi PORTB, PORTB0
+		sbi PORTB, PORTB1
+		cbi PORTB, PORTB2
+		cbi PORTB, PORTB3
+		ret
+three:
+		sbi PORTB, PORTB0
+		sbi PORTB, PORTB1
+		cbi PORTB, PORTB2
+		cbi PORTB, PORTB3
+		ret
+four:
+		cbi PORTB, PORTB0
+		cbi PORTB, PORTB1
+		sbi PORTB, PORTB2
+		cbi PORTB, PORTB3
+		ret
+six:
+		cbi PORTB, PORTB0
+		sbi PORTB, PORTB1
+		sbi PORTB, PORTB2
+		cbi PORTB, PORTB3
+		ret
+eight:
+		cbi PORTB, PORTB0
+		cbi PORTB, PORTB1
+		cbi PORTB, PORTB2
+		sbi PORTB, PORTB3
+		ret
+nine:
+		sbi PORTB, PORTB0
+		cbi PORTB, PORTB1
+		cbi PORTB, PORTB2
+		sbi PORTB, PORTB3
+		ret
+twelve:
+		cbi PORTB, PORTB0
+		cbi PORTB, PORTB1
+		sbi PORTB, PORTB2
 		sbi PORTB, PORTB3
 		ret
 ;---------------------------------------------
