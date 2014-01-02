@@ -47,7 +47,7 @@
  *
  *	1 Ground
  *	2 VCC (+3.3 to +5V)
- *	3 Contrast adjustment (VO) -						*******Wire to VCC for maximum contrast  *********
+ *	3 Contrast adjustment (VO) -						*******Wire to GND for maximum contrast  *********
  *	4 Register Select (RS). RS=0: Command, RS=1: Data
  *	5 Read/Write (R/W). R/W=0: Write, R/W=1: Read
  *	6 Clock (Enable). Falling edge triggered
@@ -139,11 +139,11 @@ void showNunchukData( WiiNunchuk &wiiClassy )
 
 int main(void)
 {
-	uint8_t statusCount = 0;
 	//
 	// Set up the LCD
 	//
 	init_lcd();
+	//displayAt(0,0,"It works.");
 
 	// Set up PE4 + PE5 (arduino pins 2 and 3) to show the wii nunchuk z and c buttons
 	DDRE |= _BV(PORTE4) | _BV(PORTE5);
