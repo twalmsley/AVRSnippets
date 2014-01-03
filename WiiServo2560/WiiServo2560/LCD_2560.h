@@ -13,7 +13,7 @@ extern "C" {
 	void writeIntructionByte(const uint8_t value);
 	void init_lcd();
 	void setPosition(const uint8_t line, const uint8_t column);
-	void display(char* value);
-	void displayAt(const uint8_t line, const uint8_t column, char* value);
+	void display(const char* value);
+	void displayAt(const uint8_t line, const uint8_t column, const char* value);
 	void to_hex(unsigned char c, char *hex);
 };

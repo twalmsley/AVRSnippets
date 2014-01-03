@@ -119,14 +119,14 @@ void setPosition(const uint8_t line, const uint8_t column) {
 	writeIntructionByte(address);
 }
 
-void display(char* value) {
+void display(const char* value) {
 	char *ptr = value;
 	while(*ptr != '\0') {
 		writeDataByte(*ptr++);
 	}
 }
 
-void displayAt(const uint8_t line, const uint8_t column, char* value) {
+void displayAt(const uint8_t line, const uint8_t column, const char* value) {
 	setPosition(line,column);
 	display(value);
 }
