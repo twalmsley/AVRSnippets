@@ -9,6 +9,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdlib.h>
 
 
 #define	LCD_PORT 	PORTD
@@ -55,9 +56,11 @@ static uint8_t steps[] = {
 		0b1001
 	};
 
+static long x = 0,y = 0;
 static uint8_t m1 = 0, m2 = 0;
 static uint8_t m1dir = 1, m2dir = 0xFF;// 0xFF is effectively -1
 
+static char text[20];
 
 uint8_t readByte() {
 	DDR_INIT_READ
@@ -110,7 +113,7 @@ void writeIntructionByte(const uint8_t value) {
 }
 
 void init_lcd() {
-	_delay_ms(100);// Give the LCD time to initialise
+	_delay_ms(300);// Give the LCD time to initialise
 	DISABLE_LCD
 	//
 	// Set to 4-bit operation
@@ -153,6 +156,17 @@ void nextM2Step() {
 	m2+=m2dir;
 }
 
+void showLocation() {
+	writeIntructionByte(INST_CLEAR_DISPLAY);
+	ltoa(x, text,10);
+	setPosition(0,0);
+	display(text);
+	
+	ltoa(y, text,10);
+	setPosition(1,0);
+	display(text);
+}
+
 void move(uint16_t m1count, uint16_t m2count) {
 	while(m1count > 0 || m2count > 0) {
 		if(m1count > 0) {
@@ -165,6 +179,7 @@ void move(uint16_t m1count, uint16_t m2count) {
 		}
 		_delay_ms(10);
 	}
+	showLocation();
 }
 
 void stepperTest() 
@@ -196,16 +211,16 @@ int main(void)
 	PORTB = 0x00;// All off
 
 	init_lcd();
-	display("Hello World.");
-	setPosition(1,0);
-	display("2nd Line.");
+	//display("Hello World.");
+	//setPosition(1,0);
+	//display("2nd Line.");
 
 	//stepperTest();
-//	move(2048, 2048);
-//	move(0, 2175);
-//	move(2048, 2048);
-//	move(0, 2175);
-//	move(2048, 2048);
-//	move(0, 2175);
-//	move(2048, 2048);
+	move(2048, 2048);
+	move(0, 2175);
+	move(2048, 2048);
+	move(0, 2175);
+	move(2048, 2048);
+	move(0, 2175);
+	move(2048, 2048);
 }
