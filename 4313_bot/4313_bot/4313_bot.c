@@ -245,6 +245,48 @@ void stepperTest()
     }
 }
 
+void zigzag() 
+{
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+}
+
+void alex() {
+move(4096);
+turnLeft90();
+move(4096);
+turnRight90();
+move(4096);
+turnLeft90();
+move(4096);
+turnRight90();	
+}
+
+void emma() {
+move(4096);
+turnRight90();
+move(4096);
+turnRight90();
+move(4096);
+turnRight90();
+move(4096);
+turnRight90();	
+}
+
 int main(void)
 {
 	DDRB = 0xFF;// Two 4-bit steppers on port B
@@ -252,20 +294,7 @@ int main(void)
 
 	init_lcd();
 
-	move(4096);
-	turnRight90();
-	move(4096);
-	turnLeft90();
-	move(4096);
-	turnRight90();
-	move(4096);
-	turnLeft90();
-	move(4096);
-	turnRight90();
-	move(4096);
-	turnLeft90();
-	move(4096);
-	turnRight90();
-	move(4096);
-	turnLeft90();
+	zigzag();
+	alex();
+	emma();
 }
