@@ -45,6 +45,8 @@
 #define INST_DISPLAYOFF_CURSOROFF_BLINKOFF 0x08
 #define INST_4BIT_2LINE_5X8FONT 0x28
 
+#define NINETY_DEGREES 2200;
+
 static uint8_t steps[] = {
 		0b0001,
 		0b0011,
@@ -57,6 +59,7 @@ static uint8_t steps[] = {
 	};
 
 static long x = 0,y = 0;
+static short int xdir = 0,ydir = 1;// Assume we start in the Y direction
 static uint8_t m1 = 0, m2 = 0;
 static uint8_t m1dir = 1, m2dir = 0xFF;// 0xFF is effectively -1
 
@@ -121,10 +124,10 @@ void init_lcd() {
 	SELECT_INSTRUCTION_REG
 	for(int count = 0;count < 3;count++) {
 		writeNibble(3);
-		_delay_us(100);
+		_delay_us(300);
 	}
 	writeNibble(2);
-	_delay_us(100);
+	_delay_us(300);
 	writeIntructionByte(INST_4BIT_2LINE_5X8FONT);
 
 	writeIntructionByte(INST_DISPLAYOFF_CURSOROFF_BLINKOFF);
@@ -167,17 +170,54 @@ void showLocation() {
 	display(text);
 }
 
-void move(uint16_t m1count, uint16_t m2count) {
-	while(m1count > 0 || m2count > 0) {
-		if(m1count > 0) {
-			nextM1Step();
-			m1count--;
-		}
-		if(m2count > 0) {
-			nextM2Step();
-			m2count--;
-		}
+void move(uint16_t distance) {
+	while(distance > 0) {
+		nextM1Step();
+		nextM2Step();
+		distance--;
+		x += xdir;
+		y += ydir;
 		_delay_ms(10);
+	}
+	showLocation();
+}
+
+void turnRight90() {
+	uint16_t distance = NINETY_DEGREES;
+	while(distance > 0) {
+		nextM2Step();
+		distance--;
+		_delay_ms(10);
+	}
+	
+	if(xdir == 1 && ydir == 0) {
+		xdir = 0,ydir = -1;
+		} else if(xdir == -1 && ydir == 0) {
+		xdir = 0,ydir = 1;
+		} else if(xdir == 0 && ydir == 1) {
+		xdir = 1, ydir = 0;
+		} else if(xdir == 0 && ydir == -1) {
+		xdir = -1, ydir = 0;
+	}
+	showLocation();
+}
+
+void turnLeft90() {
+	uint16_t distance = NINETY_DEGREES;
+	while(distance > 0) {
+		nextM1Step();
+		distance--;
+		_delay_ms(10);
+	}
+	
+	if(xdir == 0 && ydir == 1) {
+		xdir = -1,ydir = 0;
+		} else if(xdir == 0 && ydir == -1) {
+		xdir = 1,ydir = 0;
+		} else if(xdir == 1 && ydir == 0) {
+		xdir = 0, ydir = 1;
+		} else if(xdir == -1 && ydir == 0) {
+		xdir = 0, ydir = -1;
 	}
 	showLocation();
 }
@@ -211,16 +251,21 @@ int main(void)
 	PORTB = 0x00;// All off
 
 	init_lcd();
-	//display("Hello World.");
-	//setPosition(1,0);
-	//display("2nd Line.");
 
-	//stepperTest();
-	move(2048, 2048);
-	move(0, 2175);
-	move(2048, 2048);
-	move(0, 2175);
-	move(2048, 2048);
-	move(0, 2175);
-	move(2048, 2048);
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
+	move(4096);
+	turnRight90();
+	move(4096);
+	turnLeft90();
 }
