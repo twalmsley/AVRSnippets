@@ -45,7 +45,8 @@
 #define INST_DISPLAYOFF_CURSOROFF_BLINKOFF 0x08
 #define INST_4BIT_2LINE_5X8FONT 0x28
 
-#define NINETY_DEGREES 2200;
+#define NINETY_DEGREES 2200
+#define STEP_DELAY _delay_ms(2)
 
 static uint8_t steps[] = {
 		0b0001,
@@ -61,7 +62,7 @@ static uint8_t steps[] = {
 static long x = 0,y = 0;
 static short int xdir = 0,ydir = 1;// Assume we start in the Y direction
 static uint8_t m1 = 0, m2 = 0;
-static uint8_t m1dir = 1, m2dir = 0xFF;// 0xFF is effectively -1
+static uint8_t m1dir = 0xFF, m2dir = 1;// 0xFF is effectively -1
 
 static char text[20];
 
@@ -177,7 +178,7 @@ void move(uint16_t distance) {
 		distance--;
 		x += xdir;
 		y += ydir;
-		_delay_ms(10);
+		STEP_DELAY;
 	}
 	showLocation();
 }
@@ -187,7 +188,7 @@ void turnRight90() {
 	while(distance > 0) {
 		nextM2Step();
 		distance--;
-		_delay_ms(10);
+		STEP_DELAY;
 	}
 	
 	if(xdir == 1 && ydir == 0) {
@@ -207,7 +208,7 @@ void turnLeft90() {
 	while(distance > 0) {
 		nextM1Step();
 		distance--;
-		_delay_ms(10);
+		STEP_DELAY;
 	}
 	
 	if(xdir == 0 && ydir == 1) {
@@ -231,7 +232,7 @@ void stepperTest()
 		//
         for(uint16_t i = 0; i < 512; i++) {
 			nextM1Step();
-			_delay_ms(10);
+			STEP_DELAY;
 		}
 		_delay_ms(1000);
 		//
@@ -239,7 +240,7 @@ void stepperTest()
 		//
         for(uint16_t i = 0; i < 512; i++) {
 	        nextM2Step();
-	        _delay_ms(10);
+	        STEP_DELAY;
         }
         _delay_ms(1000);
     }
@@ -292,6 +293,7 @@ int main(void)
 	DDRB = 0xFF;// Two 4-bit steppers on port B
 	PORTB = 0x00;// All off
 
+	_delay_ms(5000); // Time to disconnect the programming cable
 	//stepperTest();
 	init_lcd();
 
