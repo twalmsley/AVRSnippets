@@ -292,6 +292,7 @@ int main(void)
 	DDRB = 0xFF;// Two 4-bit steppers on port B
 	PORTB = 0x00;// All off
 
+	//stepperTest();
 	init_lcd();
 
 	zigzag();
