@@ -11,6 +11,7 @@
 #include <util/delay.h>
 #include <stdlib.h>
 
+#undef LCD_PRESENT
 
 #define	LCD_PORT 	PORTD
 #define	LCD_DDR		DDRD
@@ -45,7 +46,7 @@
 #define INST_DISPLAYOFF_CURSOROFF_BLINKOFF 0x08
 #define INST_4BIT_2LINE_5X8FONT 0x28
 
-#define NINETY_DEGREES 2200
+#define NINETY_DEGREES 2200/2
 #define STEP_DELAY _delay_ms(2)
 
 static uint8_t steps[] = {
@@ -160,7 +161,18 @@ void nextM2Step() {
 	m2+=m2dir;
 }
 
+void reverseM1Step() {
+	PORTB = (PORTB & 0xF0) | steps[m1 & 0x07];
+	m1-=m1dir;
+}
+
+void reverseM2Step() {
+	PORTB = (PORTB & 0x0F) | (steps[m2 & 0x07]<<4);
+	m2-=m2dir;
+}
+
 void showLocation() {
+#ifdef LCD_PRESENT
 	writeIntructionByte(INST_CLEAR_DISPLAY);
 	ltoa(x, text,10);
 	setPosition(0,0);
@@ -169,6 +181,7 @@ void showLocation() {
 	ltoa(y, text,10);
 	setPosition(1,0);
 	display(text);
+#endif
 }
 
 void move(uint16_t distance) {
@@ -187,6 +200,7 @@ void turnRight90() {
 	uint16_t distance = NINETY_DEGREES;
 	while(distance > 0) {
 		nextM2Step();
+		reverseM1Step();
 		distance--;
 		STEP_DELAY;
 	}
@@ -207,6 +221,7 @@ void turnLeft90() {
 	uint16_t distance = NINETY_DEGREES;
 	while(distance > 0) {
 		nextM1Step();
+		reverseM2Step();
 		distance--;
 		STEP_DELAY;
 	}
@@ -295,8 +310,9 @@ int main(void)
 
 	_delay_ms(5000); // Time to disconnect the programming cable
 	//stepperTest();
+#ifdef LCD_PRESENT
 	init_lcd();
-
+#endif
 	zigzag();
 	alex();
 	emma();
