@@ -5,13 +5,12 @@
  *  Author: tony
  */
 
-#define __AVR_ATmega328P__
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdlib.h>
 
 #undef LCD_PRESENT
+#undef STEPPER_TEST
 
 #define	LCD_PORT 	PORTD
 #define	LCD_DDR		DDRD
@@ -67,7 +66,6 @@ static uint8_t m1dir = 0xFF, m2dir = 1;// 0xFF is effectively -1
 
 #ifdef LCD_PRESENT
 static char text[20];
-#endif
 
 uint8_t readByte() {
 	DDR_INIT_READ
@@ -152,6 +150,7 @@ void display(char* value) {
 		writeDataByte(*ptr++);
 	}
 }
+#endif
 
 void nextM1Step() {
 	PORTB = (PORTB & 0xF0) | steps[m1 & 0x07];
@@ -239,7 +238,7 @@ void turnLeft90() {
 	}
 	showLocation();
 }
-
+#ifdef STEPPER_TEST
 void stepperTest() 
 {
     while(1)
@@ -262,7 +261,7 @@ void stepperTest()
         _delay_ms(1000);
     }
 }
-
+#endif
 void zigzag() 
 {
 	move(4096);
@@ -311,7 +310,10 @@ int main(void)
 	PORTB = 0x00;// All off
 
 	_delay_ms(5000); // Time to disconnect the programming cable
-	//stepperTest();
+
+#ifdef STEPPER_TEST
+	stepperTest();
+#endif
 #ifdef LCD_PRESENT
 	init_lcd();
 #endif
