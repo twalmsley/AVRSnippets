@@ -5,7 +5,7 @@
  *  Author: tony
  */
 
-#define F_CPU 1000000
+#define __AVR_ATmega328P__
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -65,7 +65,9 @@ static short int xdir = 0,ydir = 1;// Assume we start in the Y direction
 static uint8_t m1 = 0, m2 = 0;
 static uint8_t m1dir = 0xFF, m2dir = 1;// 0xFF is effectively -1
 
+#ifdef LCD_PRESENT
 static char text[20];
+#endif
 
 uint8_t readByte() {
 	DDR_INIT_READ
