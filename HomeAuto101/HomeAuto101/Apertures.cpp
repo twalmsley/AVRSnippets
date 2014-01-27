@@ -1,5 +1,5 @@
 ﻿#include "apertures.h"
-#include <avr\sfr_defs.h>
+#include <avr/sfr_defs.h>
 
 Aperture::Aperture(uint16_t *ddr,uint16_t *port,uint8_t pin) {
 	this->_ddr = ddr;

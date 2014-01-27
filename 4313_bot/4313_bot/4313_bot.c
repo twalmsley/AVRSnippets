@@ -46,7 +46,7 @@
 #define INST_4BIT_2LINE_5X8FONT 0x28
 
 #define NINETY_DEGREES 2200/2
-#define STEP_DELAY _delay_ms(2)
+#define STEP_DELAY _delay_us(750)
 
 static uint8_t steps[] = {
 		0b0001,
@@ -63,6 +63,7 @@ static long x = 0,y = 0;
 static short int xdir = 0,ydir = 1;// Assume we start in the Y direction
 static uint8_t m1 = 0, m2 = 0;
 static uint8_t m1dir = 0xFF, m2dir = 1;// 0xFF is effectively -1
+static uint8_t tmpPortB = 0;//Used to prepare the next value for PORTB
 
 #ifdef LCD_PRESENT
 static char text[20];
@@ -153,22 +154,22 @@ void display(char* value) {
 #endif
 
 void nextM1Step() {
-	PORTB = (PORTB & 0xF0) | steps[m1 & 0x07];
+	tmpPortB = (tmpPortB & 0xF0) | steps[m1 & 0x07];
 	m1+=m1dir;
 }
 
 void nextM2Step() {
-	PORTB = (PORTB & 0x0F) | (steps[m2 & 0x07]<<4);
+	tmpPortB = (tmpPortB & 0x0F) | (steps[m2 & 0x07]<<4);
 	m2+=m2dir;
 }
 
 void reverseM1Step() {
-	PORTB = (PORTB & 0xF0) | steps[m1 & 0x07];
+	tmpPortB = (tmpPortB & 0xF0) | steps[m1 & 0x07];
 	m1-=m1dir;
 }
 
 void reverseM2Step() {
-	PORTB = (PORTB & 0x0F) | (steps[m2 & 0x07]<<4);
+	tmpPortB = (tmpPortB & 0x0F) | (steps[m2 & 0x07]<<4);
 	m2-=m2dir;
 }
 
@@ -185,6 +186,9 @@ void showLocation() {
 #endif
 }
 
+void go() {
+	PORTB = tmpPortB;
+}
 void move(uint16_t distance) {
 	while(distance > 0) {
 		nextM1Step();
@@ -192,6 +196,7 @@ void move(uint16_t distance) {
 		distance--;
 		x += xdir;
 		y += ydir;
+		go();
 		STEP_DELAY;
 	}
 	showLocation();
@@ -203,6 +208,7 @@ void turnRight90() {
 		nextM2Step();
 		reverseM1Step();
 		distance--;
+		go();
 		STEP_DELAY;
 	}
 	
@@ -224,6 +230,7 @@ void turnLeft90() {
 		nextM1Step();
 		reverseM2Step();
 		distance--;
+		go();
 		STEP_DELAY;
 	}
 	
@@ -248,6 +255,7 @@ void stepperTest()
 		//
         for(uint16_t i = 0; i < 512; i++) {
 			nextM1Step();
+			go();
 			STEP_DELAY;
 		}
 		_delay_ms(1000);
@@ -256,6 +264,7 @@ void stepperTest()
 		//
         for(uint16_t i = 0; i < 512; i++) {
 	        nextM2Step();
+			go();
 	        STEP_DELAY;
         }
         _delay_ms(1000);
