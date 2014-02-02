@@ -120,23 +120,29 @@ int main(void) {
 	UBRRH = 0;
 	UBRRL = 25;	//19.2Kbaud
 	UCSRA = _BV(U2X);
-	UCSRB = _BV(RXEN);
+	UCSRB = _BV(RXEN) | _BV(TXEN);
 	UCSRC = _BV(UCSZ0) | _BV(UCSZ1);
+
+	_delay_ms(1000);
+	USART_Transmit('R');// Say we're ready
 
 	while (1) {
 		unsigned char c = USART_Receive();
 		switch (c) {
 		case 'L':
 			turnLeft90();
+			USART_Transmit('R');// Say we're ready
 			break;
 		case 'R':
 			turnRight90();
+			USART_Transmit('R');// Say we're ready
 			break;
 		case 'F':
 			c = USART_Receive();
 			uint16_t distance = c<<8;
 			distance |= USART_Receive();
 			move(distance);
+			USART_Transmit('R');// Say we're ready
 			break;
 		}
 	}

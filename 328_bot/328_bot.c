@@ -28,16 +28,42 @@ int main(void) {
 	UBRR0H = 0;
 	UBRR0L = 25;//19.2Kbaud
 	UCSR0A = _BV(U2X0);
-	UCSR0B = _BV(TXEN0);
+	UCSR0B =  _BV(TXEN0) | _BV(RXEN0);
 	UCSR0C = _BV(UCSZ00) | _BV(UCSZ01);
+
+	USART_Receive();// Wait for any response from the ATTiny to mean its ready for commands.
+
 	while(1) {
-		USART_Transmit('R');
-		_delay_ms(4000);
 		USART_Transmit('F');
 		USART_Transmit(0x10);
 		USART_Transmit(0x00);
-		_delay_ms(15000);
+		USART_Receive();// Wait for any response from the ATTiny
+
 		USART_Transmit('L');
-		_delay_ms(4000);
+		USART_Receive();// Wait for any response from the ATTiny
+
+		USART_Transmit('F');
+		USART_Transmit(0x10);
+		USART_Transmit(0x00);
+		USART_Receive();// Wait for any response from the ATTiny
+
+		USART_Transmit('L');
+		USART_Receive();// Wait for any response from the ATTiny
+
+		USART_Transmit('F');
+		USART_Transmit(0x10);
+		USART_Transmit(0x00);
+		USART_Receive();// Wait for any response from the ATTiny
+
+		USART_Transmit('L');
+		USART_Receive();// Wait for any response from the ATTiny
+
+		USART_Transmit('F');
+		USART_Transmit(0x10);
+		USART_Transmit(0x00);
+		USART_Receive();// Wait for any response from the ATTiny
+
+		USART_Transmit('L');
+		USART_Receive();// Wait for any response from the ATTiny
 	}
 }
