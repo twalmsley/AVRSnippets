@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define NINETY_DEGREES 2200/2
-#define STEP_DELAY _delay_us(750)
+#define STEP_DELAY 		while(!(PINA & 0x01));_delay_us(750)
 
 static uint8_t steps[] = { 0b0001, 0b0011, 0b0010, 0b0110, 0b0100, 0b1100,
 		0b1000, 0b1001 };
@@ -114,6 +114,9 @@ unsigned char USART_Receive() {
 int main(void) {
 	DDRB = 0xFF; // Two 4-bit steppers on port B
 	PORTB = 0x00; // All off
+	DDRA = 0x00;
+	PORTA |= 0x01;
+
 	//
 	// Init the USART
 	//
@@ -124,6 +127,9 @@ int main(void) {
 	UCSRC = _BV(UCSZ0) | _BV(UCSZ1);
 
 	_delay_ms(1000);
+
+	while(PINA & 0x01);// wait for the switch on PA0
+
 	USART_Transmit('R');// Say we're ready
 
 	while (1) {
