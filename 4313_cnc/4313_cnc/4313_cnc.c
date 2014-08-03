@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define NINETY_DEGREES 2200/2
-#define STEP_DELAY _delay_us(750)
+#define STEP_DELAY _delay_ms(1)
 
 static uint8_t steps[] = { 0b0001, 0b0011, 0b0010, 0b0110, 0b0100, 0b1100,
 		0b1000, 0b1001 };
@@ -106,9 +106,11 @@ int main(void) {
 
 	_delay_ms(1000);
 
-	while(1) {
+	uint8_t count = 3;
+	while(count-- > 0) {
 		turnLeft90();
 		turnRight90();
 		move(2000);
 	}
+	while(1);
 }
